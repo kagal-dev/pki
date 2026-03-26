@@ -1,0 +1,12 @@
+// Minimal wrangler config for vitest-pool-workers.
+// Not used for deployment.
+{
+  "name": "kagal-ca-test",
+  "compatibility_date": "2026-03-12",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "kv_namespaces": [
+    { "binding": "CA_REGISTRY", "id": "ca-test-kv" }
+  ]
+}
