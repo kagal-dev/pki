@@ -4,7 +4,13 @@
   "name": "kagal-ca-test",
   "compatibility_date": "2026-03-12",
   "compatibility_flags": [
-    "nodejs_compat"
+    "nodejs_compat",
+    "enable_nodejs_process_v2",
+    "enable_nodejs_tty_module",
+    "enable_nodejs_fs_module",
+    "enable_nodejs_http_modules",
+    "enable_nodejs_perf_hooks_module",
+    "enable_nodejs_v8_module"
   ],
   "kv_namespaces": [
     { "binding": "CA_REGISTRY", "id": "ca-test-kv" }
