@@ -85,6 +85,27 @@ provides:
 It runs as a single Durable Object per CA with SQLite
 storage.
 
+## Reference RFCs
+
+Local copies live in `docs/rfc/`:
+
+| File | Subject |
+|------|---------|
+| `rfc8555.txt` | ACME protocol |
+| `rfc5280.txt` | Internet X.509 PKI — Certificate and CRL Profile |
+| `rfc6962.txt` | Certificate Transparency |
+| `rfc7515.txt` | JSON Web Signature (JWS) |
+| `rfc7517.txt` | JSON Web Key (JWK) |
+| `rfc7518.txt` | JSON Web Algorithms (JWA) |
+| `rfc7807.txt` | Problem Details for HTTP APIs |
+| `rfc8037.txt` | CFRG Curves in JOSE (Ed25519, Ed448) |
+| `rfc8737.txt` | ACME TLS-ALPN-01 Challenge |
+| `rfc8738.txt` | ACME IP Identifier Validation |
+| `rfc9773.txt` | ACME Renewal Information (ARI) |
+| `draft-ietf-acme-profiles-01.txt` | ACME Profiles extension |
+
+Read these for authoritative protocol details.
+
 ## Common Commands
 
 ```bash
