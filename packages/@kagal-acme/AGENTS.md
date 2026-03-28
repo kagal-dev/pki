@@ -20,7 +20,7 @@ on `/utils`.
 | Export | Status | Purpose |
 |--------|--------|---------|
 | `@kagal/acme/types` | Phase 1 (done) | Interfaces, const tuples, ReadonlySet, `narrow()` |
-| `@kagal/acme/schema` | Phase 2 | Valibot validators conforming to `/types` |
+| `@kagal/acme/schema` | Phase 2 (done) | Valibot validators conforming to `/types` |
 | `@kagal/acme/utils` | Phase 3+ | CSR, cert, ARI, PEM utilities |
 | `@kagal/acme/client` | Phase 3+ | Client state machines |
 | `@kagal/acme/server` | Phase 3+ | Server state machines |
@@ -134,6 +134,143 @@ JWSProtectedHeader          — RFC 7515: alg, jwk?, kid?
 - New exports must be added to `types/index.ts`.
 - No circular imports within `types/`.
 
+## Schema Sub-path Patterns
+
+### File structure
+
+Each [`schema/*.ts`][schema] mirrors a type file
+(`types/objects/*.ts`, `types/requests/*.ts`, or
+`types/jws/*.ts`). Leaf schemas
+([`encoding`][s-encoding], [`identifier`][s-identifier],
+[`jwk`][s-jwk], [`renewal-info`][s-renewal-info],
+[`directory`][s-directory]) have no schema dependencies.
+Compound schemas ([`jws`][s-jws],
+[`problem`][s-problem],
+[`finalize`][s-finalize],
+[`revoke-cert`][s-revoke-cert],
+[`challenge`][s-challenge],
+[`authorization`][s-authorization],
+[`account`][s-account], [`order`][s-order],
+[`new-account`][s-new-account],
+[`new-order`][s-new-order],
+[`new-authz`][s-new-authz],
+[`key-change`][s-key-change]) compose from leaves.
+
+### `looseObject` vs `strictObject`
+
+Three categories:
+
+- **Response objects** — `v.looseObject()`, unknown
+  fields pass through for forward compatibility.
+- **Request payloads** — `v.strictObject()`, the
+  client controls the structure. Also used for small
+  fixed structures (`FlattenedJWSSchema`).
+- **Decoded JWS headers** — `v.looseObject()`, JWS
+  headers allow additional registered and private
+  parameters (RFC 7515 §4.1).
+
+### Variant discrimination
+
+[`ChallengeSchema`][s-challenge] discriminates on `type`,
+[`AuthorizationSchema`][s-authorization] on `status`,
+[`JWKSchema`][s-jwk] on `kty` (EC, OKP, RSA).
+Shared fields live in a spread object (`challengeBase`,
+`authorizationBase`) that each variant branch includes:
+
+```typescript
+const challengeBase = {
+  url: v.string(),
+  status: v.picklist(challengeStatuses),
+  ...
+};
+
+export const ChallengeSchema = v.variant('type', [
+  v.looseObject({
+    ...challengeBase,
+    type: v.literal('http-01'),
+  }),
+  ...
+]);
+```
+
+### Union + check
+
+[`ACMERequestHeaderSchema`][s-jws] enforces `jwk`
+XOR `kid` (RFC 8555 §6.2) using `v.union` with two
+`looseObject` branches piped through `v.check` for
+mutual exclusion. `v.variant` cannot express this —
+neither field has literal values suitable as a
+discriminant.
+
+### Const tuple reuse
+
+Status fields use `v.picklist()` with the `as const`
+tuples from `/types` — single source of truth:
+
+```typescript
+import { orderStatuses } from '../types/constants/status';
+// ...
+status: v.picklist(orderStatuses),
+```
+
+Variant discriminants (`type`, `status`) use inline
+`v.literal()` — necessary for `v.variant()` branch
+discrimination. Catch-all branches derive their
+picklist from the shared tuple via `.filter()`
+(e.g. `authorizationOtherStatuses`).
+
+### Validation API
+
+[`schema/index.ts`][s-index] exports `validate*()`
+functions that return
+`ValidationResult<T>` — a discriminated union on
+`success`:
+
+```typescript
+const result = validateOrder(json);
+if (result.success) {
+  result.data;   // Order
+} else {
+  result.issues; // BaseIssue<unknown>[]
+}
+```
+
+The `data` field returns the hand-written type from
+`/types`, not Valibot's `InferOutput`.
+
+### Conformance tests
+
+[`conformance.types.ts`][s-conformance] asserts
+bidirectional assignability between each schema's
+`InferOutput` and the hand-written type. If schema
+and type drift, `tsc` fails.
+
+`DeepStripIndex<T>` recursively removes the
+`[key: string]: unknown` index signature that
+`looseObject` adds to `InferOutput`, so
+bidirectional `toExtend` checks work against
+hand-written interfaces. Wrap new schema outputs
+with `SchemaOutput<typeof XSchema>` — it applies
+the stripping automatically.
+
+### Scope
+
+Schemas cover everything `/utils` needs to
+structurally validate after decoding and before
+cryptographic verification: response objects, request
+payloads, and decoded JWS protected headers.
+The pipeline is: `/utils` decodes → `/schema`
+validates → `/utils` verifies.
+
+### Adding a new schema
+
+1. Create `schema/{name}.ts` mirroring the type
+2. Add bidirectional `expectTypeOf` pair in
+   [`conformance.types.ts`][s-conformance]
+3. Export schema and `validate*()` from
+   [`schema/index.ts`][s-index]
+4. Add runtime tests in `schema/__tests__/`
+
 <!-- references -->
 [root]: ../../AGENTS.md
 [constants]: src/types/constants/
@@ -142,3 +279,23 @@ JWSProtectedHeader          — RFC 7515: alg, jwk?, kid?
 [authorization]: src/types/objects/authorization.ts
 [problem]: src/types/objects/problem.ts
 [jws]: src/types/jws/jws.ts
+[schema]: src/schema/
+[s-index]: src/schema/index.ts
+[s-encoding]: src/schema/encoding.ts
+[s-identifier]: src/schema/identifier.ts
+[s-problem]: src/schema/problem.ts
+[s-jws]: src/schema/jws.ts
+[s-jwk]: src/schema/jwk.ts
+[s-renewal-info]: src/schema/renewal-info.ts
+[s-directory]: src/schema/directory.ts
+[s-challenge]: src/schema/challenge.ts
+[s-authorization]: src/schema/authorization.ts
+[s-account]: src/schema/account.ts
+[s-order]: src/schema/order.ts
+[s-finalize]: src/schema/finalize.ts
+[s-revoke-cert]: src/schema/revoke-cert.ts
+[s-new-account]: src/schema/new-account.ts
+[s-new-order]: src/schema/new-order.ts
+[s-new-authz]: src/schema/new-authz.ts
+[s-key-change]: src/schema/key-change.ts
+[s-conformance]: src/schema/__tests__/conformance.types.ts
