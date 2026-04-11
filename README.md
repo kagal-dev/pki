@@ -14,15 +14,15 @@ dependencies — the machine owns protocol logic, the
 consumer owns persistence, key material, and policy.
 Works on any platform with WebCrypto.
 
-Sub-path exports (planned):
+Sub-path exports:
 
 | Export | Description | Deps |
 |--------|-------------|------|
 | `@kagal/acme/types` | Interfaces, const tuples, `ReadonlySet` constants | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID | @peculiar/x509 |
-| `@kagal/acme/client` | Client state machines | WebCrypto |
-| `@kagal/acme/server` | Server state machines | WebCrypto |
+| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID | valibot, WebCrypto |
+| `@kagal/acme/client` | Client state machines | /schema, /utils (valibot, WebCrypto) |
+| `@kagal/acme/server` | Server state machines | /schema, /utils (valibot, WebCrypto) |
 
 Extensions supported from day one: ARI (RFC 9773)
 and Profiles (draft-ietf-acme-profiles).
