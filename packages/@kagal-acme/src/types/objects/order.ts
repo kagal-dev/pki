@@ -13,28 +13,25 @@ import type { CertID } from './renewal-info';
 export interface Order {
   /** Order state. */
   status: OrderStatus
-  /** RFC 3339 expiry timestamp. */
-  expires?: string
-  /** Requested domains/IPs. */
-  identifiers: Identifier[]
-  /** Certificate validity start. */
-  notBefore?: string
-  /** Certificate validity end. */
-  notAfter?: string
-  /** Error details. */
-  error?: Problem
+
   /** Authorization URLs. */
   authorizations: string[]
-  /** Finalize URL. */
-  finalize: string
   /** Certificate download URL. */
   certificate?: string
-  /**
-   * ARI predecessor certID (RFC 9773 §5).
-   *
-   * @see {@link https://datatracker.ietf.org/doc/html/rfc9773#section-5}
-   */
-  replaces?: CertID
+  /** Error details. */
+  error?: Problem
+  /** RFC 3339 expiry timestamp. */
+  expires?: string
+  /** Finalize URL. */
+  finalize: string
+  /** Requested domains/IPs. */
+  identifiers: Identifier[]
+
+  /** Certificate validity end. */
+  notAfter?: string
+  /** Certificate validity start. */
+  notBefore?: string
+
   /**
    * Selected profile (draft-ietf-acme-profiles).
    *
@@ -42,4 +39,11 @@ export interface Order {
    * @see {@link https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/}
    */
   profile?: string
+
+  /**
+   * ARI predecessor certID (RFC 9773 §5).
+   *
+   * @see {@link https://datatracker.ietf.org/doc/html/rfc9773#section-5}
+   */
+  replaces?: CertID
 };

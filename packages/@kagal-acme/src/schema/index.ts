@@ -144,6 +144,7 @@ export { RevokeCertSchema } from './revoke-cert';
  */
 export type ValidationSuccess<T> = {
   success: true
+
   data: T
 };
 
@@ -156,6 +157,7 @@ export type ValidationSuccess<T> = {
  */
 export type ValidationFailure = {
   success: false
+
   issues: v.BaseIssue<unknown>[]
 };
 

@@ -6,22 +6,22 @@
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7517#section-4}
  */
 export type JWKBase = {
-  /** Key ID (§4.5). */
-  'kid'?: string
   /** Algorithm (§4.4). */
   'alg'?: string
-  /** Public key use (§4.2). */
-  'use'?: string
   /** Key operations (§4.3). */
   'key_ops'?: readonly string[]
-  /** X.509 URL (§4.6). */
-  'x5u'?: string
+  /** Key ID (§4.5). */
+  'kid'?: string
+  /** Public key use (§4.2). */
+  'use'?: string
   /** X.509 certificate chain (§4.7). */
   'x5c'?: readonly string[]
   /** X.509 SHA-1 thumbprint (§4.8). */
   'x5t'?: string
   /** X.509 SHA-256 thumbprint (§4.9). */
   'x5t#S256'?: string
+  /** X.509 URL (§4.6). */
+  'x5u'?: string
 };
 
 /**
@@ -31,6 +31,7 @@ export type JWKBase = {
  */
 export type ECJWK = JWKBase & {
   kty: 'EC'
+
   crv: string
   x: string
   y: string
@@ -43,6 +44,7 @@ export type ECJWK = JWKBase & {
  */
 export type OKPJWK = JWKBase & {
   kty: 'OKP'
+
   crv: string
   x: string
 };
@@ -54,8 +56,9 @@ export type OKPJWK = JWKBase & {
  */
 export type RSAJWK = JWKBase & {
   kty: 'RSA'
-  n: string
+
   e: string
+  n: string
 };
 
 /**
