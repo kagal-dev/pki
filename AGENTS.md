@@ -6,11 +6,13 @@ with code in the kagal-dev/pki monorepo.
 
 ## Project Overview
 
-This monorepo contains two MIT-licensed TypeScript
+This monorepo contains three MIT-licensed TypeScript
 packages for PKI (Public Key Infrastructure):
 
 - **`@kagal/acme`** — platform-neutral ACME protocol
   library (RFC 8555)
+- **`@kagal/ct`** — platform-neutral Certificate
+  Transparency types and Merkle helpers (RFC 9162)
 - **`@kagal/ca`** — challenge-less, EAB-driven private
   CA engine for Cloudflare Workers
 
@@ -43,6 +45,11 @@ pki/
 │   │       ├── utils/         # Sub-path: @kagal/acme/utils
 │   │       ├── client/        # Sub-path: @kagal/acme/client
 │   │       └── server/        # Sub-path: @kagal/acme/server
+│   ├── @kagal-ct/             # @kagal/ct
+│   │   └── src/
+│   │       ├── index.ts       # Root entry (VERSION)
+│   │       ├── types/         # Sub-path: @kagal/ct/types
+│   │       └── schema/        # Sub-path: @kagal/ct/schema
 │   └── @kagal-ca/             # @kagal/ca
 │       └── src/
 │           ├── index.ts       # Root entry (VERSION, CAEnv)
@@ -94,6 +101,7 @@ Local copies live in `docs/rfc/`:
 | `rfc8555.txt` | ACME protocol |
 | `rfc5280.txt` | Internet X.509 PKI — Certificate and CRL Profile |
 | `rfc6962.txt` | Certificate Transparency v1 |
+| `rfc9162.txt` | Certificate Transparency v2 (supersedes 6962) |
 | `rfc7515.txt` | JSON Web Signature (JWS) |
 | `rfc7517.txt` | JSON Web Key (JWK) |
 | `rfc7518.txt` | JSON Web Algorithms (JWA) |
