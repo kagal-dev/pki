@@ -14,7 +14,7 @@ export default defineConfig({
   test: {
     globals: true,
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: [
         'text', 'json-summary', 'json', 'html',
       ],

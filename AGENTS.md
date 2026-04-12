@@ -93,7 +93,7 @@ Local copies live in `docs/rfc/`:
 |------|---------|
 | `rfc8555.txt` | ACME protocol |
 | `rfc5280.txt` | Internet X.509 PKI — Certificate and CRL Profile |
-| `rfc6962.txt` | Certificate Transparency |
+| `rfc6962.txt` | Certificate Transparency v1 |
 | `rfc7515.txt` | JSON Web Signature (JWS) |
 | `rfc7517.txt` | JSON Web Key (JWK) |
 | `rfc7518.txt` | JSON Web Algorithms (JWA) |
@@ -116,6 +116,7 @@ pnpm lint               # Lint all (root + packages)
 pnpm type-check         # Type-check all packages
 pnpm precommit          # build → lint → type-check → test
 pnpm prepack            # lint:check → per-package prepack
+pnpm test:coverage      # test with istanbul coverage report
 ```
 
 Per-package commands via `--filter`:
@@ -227,8 +228,9 @@ Each package has multiple tsconfig files:
 - `tsconfig.json` — source code (no Node types)
 - `tsconfig.tools.json` — adds Node types for
   build.config.ts, vitest.config.ts
-- `tsconfig.tests.json` — (workerd packages) adds
-  `@cloudflare/vitest-pool-workers/types`
+- `tsconfig.tests.json` — test files and compile-time
+  type assertions (`@kagal/ca` also adds
+  `@cloudflare/vitest-pool-workers/types`)
 
 The root `tsconfig.json` provides shared compiler
 options (ESNext, bundler resolution, strict mode).
