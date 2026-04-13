@@ -27,6 +27,16 @@ Sub-path exports:
 Extensions supported from day one: ARI (RFC 9773)
 and Profiles (draft-ietf-acme-profiles).
 
+### [`@kagal/ct`](packages/@kagal-ct/)
+
+Platform-neutral Certificate Transparency library
+(RFC 9162).
+
+| Export | Description | Deps |
+|--------|-------------|------|
+| `@kagal/ct/types` | CT interfaces (STH, SCT, proofs, log entries) | none |
+| `@kagal/ct/schema` | Valibot validators | valibot |
+
 ### [`@kagal/ca`](packages/@kagal-ca/)
 
 Challenge-less, EAB-driven private CA engine for
