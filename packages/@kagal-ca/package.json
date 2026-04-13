@@ -1,6 +1,6 @@
 {
   "name": "@kagal/ca",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "Challenge-less EAB-driven private CA for Cloudflare Workers",
   "author": "Alejandro Mery <amery@apptly.co>",
