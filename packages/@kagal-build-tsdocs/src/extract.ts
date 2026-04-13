@@ -76,7 +76,7 @@ function extractSymbols(
     console.warn(
       `[docs] Failed for ${exportPath}:`, error,
     );
-    return undefined;
+    return [];
   }
 }
 
@@ -99,15 +99,13 @@ export function resolveDocuments(
       entry.input, rootDirectory,
     );
 
-    if (symbols) {
-      manifest.exports[exportPath] = {
-        entryFile: path.relative(
-          rootDirectory, entry.input,
-        ),
-        symbols,
-        symbolCount: symbols.length,
-      };
-    }
+    manifest.exports[exportPath] = {
+      entryFile: path.relative(
+        rootDirectory, entry.input,
+      ),
+      symbols,
+      symbolCount: symbols.length,
+    };
   }
 
   return manifest;

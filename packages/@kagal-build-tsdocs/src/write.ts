@@ -17,7 +17,7 @@ export function writeDocuments(
     Object.entries(manifest.exports)) {
     const filename = exportPath === '.' ?
       'index' :
-      exportPath.replace('./', '');
+      path.basename(exportPath);
 
     writeFileSync(
       path.resolve(outputDirectory, `${filename}.json`),
