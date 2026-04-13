@@ -1,27 +1,23 @@
 {
-  "name": "@kagal/ct",
-  "version": "0.0.0",
+  "name": "@kagal/build-tsdocs",
+  "version": "0.0.1",
   "type": "module",
-  "description": "Certificate Transparency types and Merkle helpers (RFC 9162)",
+  "description": "TSDoc extraction hook for unbuild",
   "author": "Alejandro Mery <amery@apptly.co>",
   "license": "MIT",
-  "homepage": "https://github.com/kagal-dev/pki/tree/main/packages/@kagal-ct#readme",
+  "homepage": "https://github.com/kagal-dev/pki/tree/main/packages/@kagal-build-tsdocs#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kagal-dev/pki.git",
-    "directory": "packages/@kagal-ct"
+    "directory": "packages/@kagal-build-tsdocs"
   },
   "bugs": {
     "url": "https://github.com/kagal-dev/pki/issues"
   },
   "keywords": [
-    "certificate-transparency",
-    "ct",
     "kagal",
-    "merkle",
-    "pki",
-    "rfc9162",
-    "typescript"
+    "tsdoc",
+    "unbuild"
   ],
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -30,14 +26,6 @@
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
-    },
-    "./schema": {
-      "types": "./dist/schema.d.mts",
-      "default": "./dist/schema.mjs"
-    },
-    "./types": {
-      "types": "./dist/types.d.mts",
-      "default": "./dist/types.mjs"
     }
   },
   "files": [
@@ -65,10 +53,9 @@
     "type-check:tools": "tsc --noEmit -p tsconfig.tools.json"
   },
   "dependencies": {
-    "valibot": "^1.3.1"
+    "tsdoc-markdown": "^1.4.1"
   },
   "devDependencies": {
-    "@kagal/build-tsdocs": "workspace:^",
     "@kagal/cross-test": "^0.1.2",
     "@poupe/eslint-config": "~0.9.1",
     "@types/node": "^20.19.37",
@@ -80,6 +67,9 @@
     "typescript": "~5.9.3",
     "unbuild": "3.6.1",
     "vitest": "^4.1.4"
+  },
+  "peerDependencies": {
+    "unbuild": ">=3.5.0"
   },
   "engines": {
     "node": ">= 20.20.1",
