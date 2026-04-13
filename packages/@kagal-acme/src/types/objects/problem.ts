@@ -10,16 +10,17 @@ import type { Identifier } from './identifier';
 export interface Subproblem {
   /** URN error type. */
   type: string
-  /** Human-readable summary (RFC 7807 §3.1). */
-  title?: string
+
   /** Human-readable description. */
   detail?: string
-  /** HTTP status code. */
-  status?: number
-  /** URI reference for this occurrence (RFC 7807 §3.1). */
-  instance?: string
   /** Related identifier. */
   identifier?: Identifier
+  /** URI reference for this occurrence (RFC 7807 §3.1). */
+  instance?: string
+  /** HTTP status code. */
+  status?: number
+  /** Human-readable summary (RFC 7807 §3.1). */
+  title?: string
 };
 
 /**

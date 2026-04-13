@@ -12,12 +12,12 @@ import type {
 export type NewAccount = {
   /** Contact URIs. */
   contact?: string[]
-  /** ToS agreement. */
-  termsOfServiceAgreed?: boolean
-  /** Return existing account only. */
-  onlyReturnExisting?: boolean
   /** External account binding JWS. */
   externalAccountBinding?: ExternalAccountBinding
+  /** Return existing account only. */
+  onlyReturnExisting?: boolean
+  /** ToS agreement. */
+  termsOfServiceAgreed?: boolean
 };
 
 /**

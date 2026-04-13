@@ -16,11 +16,12 @@ export type CertID = string;
 export interface RenewalInfo {
   /** Suggested renewal window. */
   suggestedWindow: {
-    /** RFC 3339 start timestamp. */
-    start: string
     /** RFC 3339 end timestamp. */
     end: string
+    /** RFC 3339 start timestamp. */
+    start: string
   }
+
   /** URL explaining the renewal suggestion. */
   explanationURL?: string
 };

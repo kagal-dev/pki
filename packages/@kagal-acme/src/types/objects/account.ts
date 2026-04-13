@@ -22,12 +22,13 @@ export type ExternalAccountBinding = FlattenedJWS;
 export interface Account {
   /** Account state. */
   status: AccountStatus
+
   /** Contact URIs (`mailto:...`). */
   contact?: string[]
-  /** Whether ToS was accepted. */
-  termsOfServiceAgreed?: boolean
   /** EAB JWS (registration only). */
   externalAccountBinding?: ExternalAccountBinding
   /** URL to order list. */
   orders: string
+  /** Whether ToS was accepted. */
+  termsOfServiceAgreed?: boolean
 };

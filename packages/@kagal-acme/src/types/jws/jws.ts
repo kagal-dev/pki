@@ -17,6 +17,7 @@ import type { JWK } from './jwk';
 export interface FlattenedJWS {
   /** Base64url-encoded protected header. */
   protected: Base64url
+
   /** Base64url-encoded payload (empty for POST-as-GET). */
   payload: string
   /** Base64url-encoded signature. */
@@ -72,7 +73,7 @@ export type ACMERequestHeader =
     kid?: never
   } |
   ACMEProtectedHeader & {
+    jwk?: never
     /** Account URL. */
     kid: string
-    jwk?: never
   };

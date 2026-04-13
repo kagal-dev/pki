@@ -10,12 +10,12 @@ import type { Identifier } from './identifier';
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.4}
  */
 export interface AuthorizationBase {
-  /** Subject identifier. */
-  identifier: Identifier
   /** Associated challenges. */
   challenges: Challenge[]
   /** RFC 3339 expiry timestamp. */
   expires?: string
+  /** Subject identifier. */
+  identifier: Identifier
   /** True for wildcard authorisations. */
   wildcard?: boolean
 };
@@ -30,12 +30,12 @@ export interface AuthorizationBase {
  */
 export type Authorization =
   AuthorizationBase & {
-    status: 'pending'
-  } |
-  AuthorizationBase & {
-    status: 'valid'
     /** Required when valid. */
     expires: string
+    status: 'valid'
+  } |
+  AuthorizationBase & {
+    status: 'pending'
   } |
   AuthorizationBase & {
     status: Exclude<AuthorizationStatus, 'pending' | 'valid'>

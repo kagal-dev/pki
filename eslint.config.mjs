@@ -6,5 +6,6 @@ export default defineConfig({
     '.claude/**/memory',
     '.tmp',
     '**/.wrangler',
+    '**/coverage',
   ],
 });

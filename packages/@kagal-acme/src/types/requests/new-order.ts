@@ -11,10 +11,12 @@ import type { CertID } from '../objects/renewal-info';
 export type NewOrder = {
   /** Requested identifiers. */
   identifiers: Identifier[]
-  /** Certificate validity start (RFC 3339). */
-  notBefore?: string
+
   /** Certificate validity end (RFC 3339). */
   notAfter?: string
+  /** Certificate validity start (RFC 3339). */
+  notBefore?: string
+
   /**
    * Desired profile name.
    *
@@ -22,6 +24,7 @@ export type NewOrder = {
    * @see {@link https://datatracker.ietf.org/doc/draft-ietf-acme-profiles/}
    */
   profile?: string
+
   /**
    * ARI predecessor certID (RFC 9773 §5).
    *

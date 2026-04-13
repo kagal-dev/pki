@@ -9,14 +9,14 @@ import type { Problem } from './problem';
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.5}
  */
 export interface ChallengeBase {
-  /** Challenge URL. */
-  url: string
-  /** Challenge state. */
-  status: ChallengeStatus
-  /** RFC 3339 validation timestamp. */
-  validated?: string
   /** Error details. */
   error?: Problem
+  /** Challenge state. */
+  status: ChallengeStatus
+  /** Challenge URL. */
+  url: string
+  /** RFC 3339 validation timestamp. */
+  validated?: string
 };
 
 /**
@@ -26,6 +26,7 @@ export interface ChallengeBase {
  */
 export type HTTPChallenge = ChallengeBase & {
   type: 'http-01'
+
   token: string
 };
 
@@ -36,6 +37,7 @@ export type HTTPChallenge = ChallengeBase & {
  */
 export type DNSChallenge = ChallengeBase & {
   type: 'dns-01'
+
   token: string
 };
 
@@ -46,6 +48,7 @@ export type DNSChallenge = ChallengeBase & {
  */
 export type TLSALPNChallenge = ChallengeBase & {
   type: 'tls-alpn-01'
+
   token: string
 };
 
