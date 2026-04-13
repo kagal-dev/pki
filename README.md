@@ -60,6 +60,18 @@ Beyond the ACME surface:
 - **`issueDirect`** — programmatic issuance via RPC,
   bypassing the ACME flow but sharing storage
 
+## Build Tooling
+
+### [`@kagal/build-tsdocs`](packages/@kagal-build-tsdocs/)
+
+TSDoc extraction hook for unbuild. Extracts documented
+symbols at build time and writes per-export JSON files
+plus a unified `api.json` manifest.
+
+| Export | Description | Deps |
+|--------|-------------|------|
+| `@kagal/build-tsdocs` | `newDocumentsHook()` factory, types | tsdoc-markdown, unbuild (peer) |
+
 ## Development
 
 ```sh

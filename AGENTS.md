@@ -6,15 +6,17 @@ with code in the kagal-dev/pki monorepo.
 
 ## Project Overview
 
-This monorepo contains three MIT-licensed TypeScript
+This monorepo contains four MIT-licensed TypeScript
 packages for PKI (Public Key Infrastructure):
 
 - **`@kagal/acme`** — platform-neutral ACME protocol
   library (RFC 8555)
 - **`@kagal/ct`** — platform-neutral Certificate
-  Transparency types and Merkle helpers (RFC 9162)
+  Transparency types and schema validators (RFC 9162)
 - **`@kagal/ca`** — challenge-less, EAB-driven private
   CA engine for Cloudflare Workers
+- **`@kagal/build-tsdocs`** — TSDoc extraction hook for
+  unbuild, used across the other packages
 
 The packages follow a strict layering:
 
@@ -45,15 +47,21 @@ pki/
 │   │       ├── utils/         # Sub-path: @kagal/acme/utils
 │   │       ├── client/        # Sub-path: @kagal/acme/client
 │   │       └── server/        # Sub-path: @kagal/acme/server
-│   ├── @kagal-ct/             # @kagal/ct
+│   ├── @kagal-build-tsdocs/   # @kagal/build-tsdocs
 │   │   └── src/
-│   │       ├── index.ts       # Root entry (VERSION)
-│   │       ├── types/         # Sub-path: @kagal/ct/types
-│   │       └── schema/        # Sub-path: @kagal/ct/schema
-│   └── @kagal-ca/             # @kagal/ca
+│   │       ├── index.ts       # newDocumentsHook(), VERSION
+│   │       ├── types.ts       # Manifest types, DocEntry re-export
+│   │       ├── extract.ts     # Symbol extraction logic
+│   │       └── write.ts       # JSON output and logging
+│   ├── @kagal-ca/             # @kagal/ca
+│   │   └── src/
+│   │       ├── index.ts       # Root entry (VERSION, CAEnv)
+│   │       └── types.ts       # Cloudflare environment bindings
+│   └── @kagal-ct/             # @kagal/ct
 │       └── src/
-│           ├── index.ts       # Root entry (VERSION, CAEnv)
-│           └── types.ts       # Cloudflare environment bindings
+│           ├── index.ts       # Root entry (VERSION)
+│           ├── types/         # Sub-path: @kagal/ct/types
+│           └── schema/        # Sub-path: @kagal/ct/schema
 ├── docs/                      # Design documents (not published)
 ├── .github/workflows/         # CI/CD
 ├── pnpm-workspace.yaml
@@ -260,6 +268,10 @@ options (ESNext, bundler resolution, strict mode).
 - **unbuild** for all packages (ESM + DTS, sourcemaps)
 - `build.config.ts` defines entry points — `@kagal/acme`
   has six entries (root + five sub-paths)
+- `@kagal/build-tsdocs` provides `newDocumentsHook()` —
+  an unbuild `build:done` hook that extracts TSDoc
+  symbols and writes per-export JSON to `_docs/` at the
+  package root (not inside `dist/`, does not ship to npm)
 - `prepare` script: `cross-test -s dist/index.mjs ||
   unbuild --stub` (conditional stubbing)
 - `dev:prepare`: `unbuild --stub` (unconditional)
