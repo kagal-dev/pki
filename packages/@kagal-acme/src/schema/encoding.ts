@@ -2,6 +2,13 @@
 
 import * as v from 'valibot';
 
+import {
+  asBase64url,
+  asPEM,
+  type Base64url,
+  type PEM,
+} from '../types/encoding';
+
 /** Base64url without padding (RFC 7515 §2). */
 const base64url = /^[A-Za-z0-9_-]+$/;
 
@@ -9,7 +16,26 @@ const base64url = /^[A-Za-z0-9_-]+$/;
 const base64urlOrEmpty = /^[A-Za-z0-9_-]*$/;
 
 /**
+ * PEM armour — one or more `-----BEGIN <label>-----` /
+ * `-----END <label>-----` blocks (RFC 7468 §3).
+ *
+ * @remarks
+ * Structural check only — the label inside BEGIN/END
+ * and the payload contents are not validated here
+ * (that's x509's job). Permits concatenated blocks to
+ * accommodate certificate chains.
+ */
+const pemArmour =
+  /^(?:-----BEGIN [^\n]+?-----[\s\S]+?-----END [^\n]+?-----\s*)+$/;
+
+/**
  * Non-empty {@link Base64url} schema.
+ *
+ * @remarks
+ * Output is branded — the trailing `v.transform` tags
+ * the validated string as {@link Base64url} so
+ * `InferOutput<typeof Base64urlSchema>` matches the
+ * hand-written type exactly.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7515#section-2}
  */
@@ -20,11 +46,19 @@ export const Base64urlSchema = v.pipe(
     (s) => s.length % 4 !== 1,
     'invalid base64url length',
   ),
+  v.transform((s): Base64url => asBase64url(s)),
 );
 
 /**
  * {@link Base64url} schema allowing empty string
  * (POST-as-GET payload, RFC 8555 §6.3).
+ *
+ * @remarks
+ * Output is `'' | Base64url` — the empty case is
+ * preserved as a literal empty string (the brand's
+ * non-empty regex rejects `''`), while any non-empty
+ * match is tagged as {@link Base64url}. This matches
+ * the hand-written {@link FlattenedJWS.payload} type.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-6.3}
  */
@@ -35,4 +69,27 @@ export const Base64urlOrEmptySchema = v.pipe(
     (s) => s === '' || s.length % 4 !== 1,
     'invalid base64url length',
   ),
+  v.transform((s): '' | Base64url =>
+    s === '' ? '' : asBase64url(s),
+  ),
+);
+
+/**
+ * {@link PEM} armoured-text schema (RFC 7468).
+ *
+ * @remarks
+ * Accepts one or more concatenated PEM blocks so a
+ * single CSR/key/certificate and a full certificate
+ * chain both validate. Does not enforce label
+ * consistency between a block's `BEGIN` and `END`
+ * markers — that and the base64 payload are checked
+ * downstream by the x509 parser. Output is branded
+ * {@link PEM}.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc7468}
+ */
+export const PEMSchema = v.pipe(
+  v.string(),
+  v.regex(pemArmour),
+  v.transform((s): PEM => asPEM(s)),
 );

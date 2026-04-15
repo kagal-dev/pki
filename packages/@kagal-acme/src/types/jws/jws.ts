@@ -19,7 +19,7 @@ export interface FlattenedJWS {
   protected: Base64url
 
   /** Base64url-encoded payload (empty for POST-as-GET). */
-  payload: string
+  payload: '' | Base64url
   /** Base64url-encoded signature. */
   signature: Base64url
 };

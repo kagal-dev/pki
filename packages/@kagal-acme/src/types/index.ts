@@ -25,20 +25,32 @@ export {
   OrderStatuses,
 } from './constants';
 
-export type {
-  Base64url,
+export {
+  asBase64url,
+  asPEM,
+  type Base64url,
+  type PEM,
 } from './encoding';
 
 export type {
   ACMEProtectedHeader,
   ACMERequestHeader,
-  ECJWK,
   FlattenedJWS,
-  JWK,
-  JWKBase,
   JWSProtectedHeader,
-  OKPJWK,
-  RSAJWK,
+} from './jws';
+
+export {
+  type ECCurve,
+  ECCurves,
+  ecCurves,
+  type ECJWK,
+  type JWK,
+  type JWKBase,
+  type OKPCurve,
+  OKPCurves,
+  okpCurves,
+  type OKPJWK,
+  type RSAJWK,
 } from './jws';
 
 export type {

@@ -20,9 +20,15 @@ Sub-path exports:
 |--------|-------------|------|
 | `@kagal/acme/types` | Interfaces, const tuples, `ReadonlySet` constants | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID | valibot, WebCrypto |
-| `@kagal/acme/client` | Client state machines | /schema, /utils (valibot, WebCrypto) |
-| `@kagal/acme/server` | Server state machines | /schema, /utils (valibot, WebCrypto) |
+| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints | WebCrypto |
+
+Planned:
+
+| Export | Description | Deps |
+|--------|-------------|------|
+| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID, PEM helpers | + valibot, @peculiar/x509, pkijs |
+| `@kagal/acme/client` | Client state machines | /schema, /utils |
+| `@kagal/acme/server` | Server state machines | /schema, /utils |
 
 Extensions supported from day one: ARI (RFC 9773)
 and Profiles (draft-ietf-acme-profiles).

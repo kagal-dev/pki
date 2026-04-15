@@ -10,20 +10,31 @@ Platform-agnostic ACME protocol library (RFC 8555).
 No Cloudflare types, no Node-specific APIs.
 The `/types` sub-path has zero runtime dependencies.
 The `/schema` sub-path depends only on Valibot.
-The `/utils` sub-path will extend `/schema` with
-WebCrypto-based validation (Valibot + WebCrypto).
-The `/client` and `/server` sub-paths will depend
-on `/utils`.
+The `/utils` sub-path uses WebCrypto and
+`btoa`/`atob` for base64url codec, random bytes,
+and RFC 7638 JWK thumbprint. It will extend with
+Valibot and `@peculiar/x509` + `pkijs` for CSR,
+cert, and ARI helpers.
+The `/client` and `/server` sub-paths compose
+`/schema` and `/utils`.
 
 ## Sub-path Exports
 
-| Export | Status | Purpose |
-|--------|--------|---------|
-| `@kagal/acme/types` | Phase 1 (done) | Interfaces, const tuples, ReadonlySet, `narrow()` |
-| `@kagal/acme/schema` | Phase 2 (done) | Valibot validators conforming to `/types` |
-| `@kagal/acme/utils` | Phase 3+ | CSR, cert, ARI, PEM utilities |
-| `@kagal/acme/client` | Phase 3+ | Client state machines |
-| `@kagal/acme/server` | Phase 3+ | Server state machines |
+### Current
+
+| Export | Purpose |
+|--------|---------|
+| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet, branded strings, `narrow()` |
+| `@kagal/acme/schema` | Valibot validators conforming to `/types` |
+| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint |
+
+### Planned
+
+| Export | Purpose |
+|--------|---------|
+| `@kagal/acme/utils` | CSR, cert, ARI, PEM utilities |
+| `@kagal/acme/client` | Client state machines |
+| `@kagal/acme/server` | Server state machines |
 
 ## Types Sub-path Patterns
 
@@ -93,6 +104,36 @@ export const OrderStatuses: ReadonlySet<OrderStatus> = new Set(orderStatuses);
 All constant files live in [`types/constants/`][constants].
 Utility functions (e.g. `narrow()`) live in
 [`types/utils.ts`][utils].
+
+### Branded strings
+
+[`Base64url`][encoding] and [`PEM`][encoding] are
+branded `string` types — intersections such as
+`string & { readonly _Base64urlBrand: void }`,
+keyed by string-named phantom properties. String
+keys (not a `unique symbol` — see the
+[rationale comment in `types/encoding.ts`][encoding])
+so the brand is nameable across module boundaries
+without TS4023 on declaration emit.
+Producers in `/utils` (`encodeBase64url`,
+`getRandom`, `jwkThumbprint`) return the brand
+directly; the matching schemas
+([`Base64urlSchema`][s-encoding],
+[`PEMSchema`][s-encoding]) transform to the brand
+on the last pipe step. Plain `string` cannot be
+assigned to a branded slot — consumers must go
+through an accessor (`asBase64url` / `asPEM`), a
+producer, or a schema.
+
+The accessors are unvalidated — use them only at
+trust boundaries (known-correct encoder output,
+row loaded from a store validated at ingest).
+Untrusted input must go through the schema.
+
+The brand is nominal at the type level only; at
+runtime the value is a plain `string`, so
+`JSON.stringify`, concatenation, and storage
+writes work transparently.
 
 ### JWS type hierarchy ([`jws.ts`][jws])
 
@@ -219,6 +260,23 @@ discrimination. Catch-all branches derive their
 picklist from the shared tuple via `.filter()`
 (e.g. `authorizationOtherStatuses`).
 
+### Branded outputs
+
+Encoding schemas end in `v.transform` so their
+`InferOutput` matches the hand-written brand, not
+bare `string`. Callers receive
+[`Base64url`][encoding] / [`PEM`][encoding] from
+`validateBase64url` / `validatePEM` without a
+cast.
+
+The conformance helper `DeepStripIndex<T>`
+short-circuits on `T extends string` so the
+mapped rewrite (whose job is stripping
+`looseObject`'s index signature) doesn't also
+strip the primitive side of a branded
+intersection — otherwise `Base64url` would
+collapse to `{}` in the stripped form.
+
 ### Validation API
 
 [`schema/index.ts`][s-index] exports `validate*()`
@@ -271,10 +329,65 @@ validates → `/utils` verifies.
    [`schema/index.ts`][s-index]
 4. Add runtime tests in `schema/__tests__/`
 
+## Utils Sub-path Patterns
+
+### Producers return branded types
+
+Every `/utils` function that outputs encoded bytes
+returns [`Base64url`][encoding] directly, not
+`string`. The brand travels from the producer into
+every consumer that types its inputs against
+`Base64url` — no intermediate `as` casts, no
+accidental mixing with plain strings. The brand
+conformance file
+`src/types/__tests__/encoding.types.ts` asserts
+`ReturnType<typeof encodeBase64url>` is exactly
+`Base64url`; if a producer ever widens back to
+`string`, the type-check fails.
+
+### canonicalJWK literal `kty`
+
+[`canonicalJWK`][u-jwk] switches on `jwk.kty` and
+emits the thumbprint input with `kty: 'EC'` /
+`'OKP'` / `'RSA'` as string literals, not
+`kty: jwk.kty`. TypeScript's discriminated-union
+narrowing would let either form compile — the
+literal form is preferred because:
+
+- The canonical form is self-documenting at the
+  return site: each branch lists exactly the
+  required RFC 7638 members.
+- There is no DRY payoff; the set of `kty` values
+  is RFC-fixed.
+- Defence-in-depth if a future refactor
+  destructures or reshapes `jwk` before the
+  switch.
+
+### `String.fromCodePoint` argument limit
+
+[`encodeBase64url`][u-encoding] spreads the byte
+array as call arguments to
+`String.fromCodePoint(...bytes)`. V8's
+argument-limit (~100K) caps the safe input size.
+Fine for signatures, hashes, CSRs; revisit with a
+chunked implementation if full certificate chains
+ever pass through this helper.
+
+### Forgiving `atob`
+
+[`decodeBase64url`][u-encoding] substitutes
+URL-safe characters (`-` → `+`, `_` → `/`) and
+passes the result straight to `atob` without
+re-padding. The HTML spec's forgiving-base64
+decoder accepts missing `=` padding, and every
+browser / worker runtime conforms. Don't add a
+re-pad step — it would be dead code.
+
 <!-- references -->
 [root]: ../../AGENTS.md
 [constants]: src/types/constants/
 [utils]: src/types/utils.ts
+[encoding]: src/types/encoding.ts
 [challenge]: src/types/objects/challenge.ts
 [authorization]: src/types/objects/authorization.ts
 [problem]: src/types/objects/problem.ts
@@ -299,3 +412,5 @@ validates → `/utils` verifies.
 [s-new-authz]: src/schema/new-authz.ts
 [s-key-change]: src/schema/key-change.ts
 [s-conformance]: src/schema/__tests__/conformance.types.ts
+[u-encoding]: src/utils/encoding.ts
+[u-jwk]: src/utils/jwk.ts
