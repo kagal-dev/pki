@@ -2,6 +2,13 @@
 
 import * as v from 'valibot';
 
+import {
+  ecCurves,
+  okpCurves,
+} from '../types/jws/jwk';
+
+import { Base64urlSchema } from './encoding';
+
 /** Shared optional JWK members (RFC 7517 §4). */
 const jwkBase = {
   'kid': v.optional(v.string()),
@@ -22,31 +29,40 @@ const jwkBase = {
  * {@link JWK} schema (RFC 7517).
  *
  * @remarks
- * Uses `v.variant` on `kty` to discriminate
- * EC, OKP, and RSA key types. Each variant uses
- * `looseObject` — JWKs may contain additional
- * members (RFC 7517 §4).
+ * Uses `v.variant` on `kty` to discriminate EC, OKP,
+ * and RSA key types. Each variant uses `looseObject` —
+ * JWKs may contain additional members (RFC 7517 §4).
+ *
+ * `crv` is a picklist restricted to the registered
+ * curves per key type. Coordinate/modulus members
+ * (`x`, `y`, `n`, `e`) go through
+ * {@link Base64urlSchema}: non-empty, URL-safe
+ * alphabet, length `% 4 !== 1`. Optional base members
+ * (`alg`, `use`, `key_ops`, `x5*`) stay free-form
+ * strings — RFC 7517 permits unregistered values.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7517}
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc7518#section-6}
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8037#section-2}
  */
 export const JWKSchema = v.variant('kty', [
   v.looseObject({
     kty: v.literal('EC'),
-    crv: v.string(),
-    x: v.string(),
-    y: v.string(),
+    crv: v.picklist(ecCurves),
+    x: Base64urlSchema,
+    y: Base64urlSchema,
     ...jwkBase,
   }),
   v.looseObject({
     kty: v.literal('OKP'),
-    crv: v.string(),
-    x: v.string(),
+    crv: v.picklist(okpCurves),
+    x: Base64urlSchema,
     ...jwkBase,
   }),
   v.looseObject({
     kty: v.literal('RSA'),
-    n: v.string(),
-    e: v.string(),
+    n: Base64urlSchema,
+    e: Base64urlSchema,
     ...jwkBase,
   }),
 ]);

@@ -8,10 +8,9 @@ and a private certificate authority.
 ### [`@kagal/acme`](packages/@kagal-acme/)
 
 Platform-neutral ACME protocol library (RFC 8555).
-Both client and server implemented as resumable state
-machines with JSON-serialisable state and injected
-dependencies — the machine owns protocol logic, the
-consumer owns persistence, key material, and policy.
+Exports ACME protocol types, Valibot schemas, and
+WebCrypto-based utilities (JWK thumbprints, JWK
+export / parse, base64url codec, random bytes).
 Works on any platform with WebCrypto.
 
 Sub-path exports:
@@ -20,9 +19,23 @@ Sub-path exports:
 |--------|-------------|------|
 | `@kagal/acme/types` | Interfaces, const tuples, `ReadonlySet` constants | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID | valibot, WebCrypto |
-| `@kagal/acme/client` | Client state machines | /schema, /utils (valibot, WebCrypto) |
-| `@kagal/acme/server` | Server state machines | /schema, /utils (valibot, WebCrypto) |
+| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK parse | WebCrypto, /schema |
+| `@kagal/acme/client` | Stub — no surface yet | none |
+| `@kagal/acme/server` | Stub — no surface yet | none |
+
+Planned:
+
+| Export | Description | Deps |
+|--------|-------------|------|
+| `@kagal/acme/utils` | + CSR parsing, cert inspection, ARI cert ID, PEM helpers | + @peculiar/x509, pkijs |
+| `@kagal/acme/client` | + Client state machines | /schema, /utils |
+| `@kagal/acme/server` | + Server state machines | /schema, /utils |
+
+Client and server will ship as resumable state
+machines with JSON-serialisable state and injected
+dependencies — the machine will own protocol logic,
+the consumer will own persistence, key material, and
+policy.
 
 Extensions supported from day one: ARI (RFC 9773)
 and Profiles (draft-ietf-acme-profiles).

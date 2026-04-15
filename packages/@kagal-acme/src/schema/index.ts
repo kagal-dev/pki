@@ -4,7 +4,7 @@
 
 import * as v from 'valibot';
 
-import type { Base64url } from '../types/encoding';
+import type { Base64url, PEM } from '../types/encoding';
 import type { JWK } from '../types/jws/jwk';
 import type {
   ACMEProtectedHeader,
@@ -62,6 +62,7 @@ import {
 import {
   Base64urlOrEmptySchema,
   Base64urlSchema,
+  PEMSchema,
 } from './encoding';
 import { FinalizeSchema } from './finalize';
 import { IdentifierSchema } from './identifier';
@@ -103,6 +104,7 @@ export {
 export {
   Base64urlOrEmptySchema,
   Base64urlSchema,
+  PEMSchema,
 } from './encoding';
 export { FinalizeSchema } from './finalize';
 export {
@@ -214,13 +216,29 @@ export function validateBase64url(
  * (POST-as-GET payload).
  *
  * @param input - raw string
- * @returns {@link ValidationResult} with
- *   {@link Base64url} or empty string on success
+ * @returns {@link ValidationResult} with `'' | Base64url`
+ *   on success — non-empty matches are branded; the
+ *   empty case stays a literal empty string.
  */
 export function validateBase64urlOrEmpty(
   input: unknown,
-): ValidationResult<string> {
+): ValidationResult<'' | Base64url> {
   return safeValidate(Base64urlOrEmptySchema, input);
+}
+
+/**
+ * Validate {@link PEM} armoured text (RFC 7468).
+ *
+ * @param input - raw string
+ * @returns {@link ValidationResult} with {@link PEM} on
+ *   success. Accepts a single block or a concatenated
+ *   chain; label contents and base64 payload are left
+ *   to the x509 parser.
+ */
+export function validatePEM(
+  input: unknown,
+): ValidationResult<PEM> {
+  return safeValidate(PEMSchema, input);
 }
 
 /**

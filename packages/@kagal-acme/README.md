@@ -1,18 +1,34 @@
 # @kagal/acme
 
 Platform-neutral ACME protocol library (RFC 8555).
-Client and server as resumable state machines with
-injected dependencies.
+Protocol types, Valibot schemas, and WebCrypto-based
+utilities.
 
 ## Sub-path Exports
 
-| Export | Description | Deps |
-|--------|-------------|------|
-| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet constants | none |
+### Current
+
+| Export | Description | Dependencies |
+|--------|-------------|--------------|
+| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet constants, branded `Base64url` / `PEM` | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID | valibot, WebCrypto |
-| `@kagal/acme/client` | Client state machines | /schema, /utils (valibot, WebCrypto) |
-| `@kagal/acme/server` | Server state machines | /schema, /utils (valibot, WebCrypto) |
+| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK parse | WebCrypto, /schema |
+| `@kagal/acme/client` | Stub — no surface yet | none |
+| `@kagal/acme/server` | Stub — no surface yet | none |
+
+### Planned
+
+| Export | Description | Dependencies |
+|--------|-------------|--------------|
+| `@kagal/acme/utils` | + CSR parsing, cert inspection, ARI cert ID, PEM helpers | + @peculiar/x509, pkijs |
+| `@kagal/acme/client` | + Client state machines | /schema, /utils |
+| `@kagal/acme/server` | + Server state machines | /schema, /utils |
+
+Client and server will ship as resumable state
+machines with JSON-serialisable state and injected
+dependencies — the machine will own protocol logic,
+the consumer will own persistence, key material, and
+policy.
 
 Sub-paths are layered by dependency weight — import
 the lightest layer you need:
@@ -29,8 +45,17 @@ client  server   protocol state machines
 
 `/schema` validators return the hand-written types
 from `/types`, not Valibot's inferred output.
-`/utils` will use `/schema` internally for the
-decode → validate → verify pipeline.
+`/utils` uses `/schema` internally for the
+decode → validate → verify pipeline (`parseJWK`).
+
+Encoding contracts cross the layer boundary as
+branded strings: `@kagal/acme/types` exports
+`Base64url` and `PEM`, and every `/utils` producer
+and `/schema` validator returns the brand. Plain
+`string` cannot be assigned to a branded slot —
+use a producer, a validator, or the unvalidated
+`asBase64url` / `asPEM` accessor at a trust
+boundary.
 
 Type-only consumers add `@kagal/acme` as a
 `devDependency` and import from `/types`.
@@ -74,6 +99,25 @@ client controls the structure. Decoded JWS headers
 use `looseObject` (headers allow additional
 parameters) with `ACMERequestHeaderSchema` enforcing
 the `jwk` XOR `kid` constraint.
+
+### Encoding
+
+```typescript
+import {
+  encodeBase64url,
+  getRandom,
+  jwkThumbprint,
+} from '@kagal/acme/utils';
+
+// Encode raw bytes to base64url (branded `Base64url`).
+const sig = encodeBase64url(signatureBytes);
+
+// Random token, base64url-encoded.
+const nonce = getRandom(16);
+
+// RFC 7638 SHA-256 JWK thumbprint — 43 chars.
+const thumbprint = await jwkThumbprint(accountJWK);
+```
 
 ## Licence
 
