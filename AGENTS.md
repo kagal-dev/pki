@@ -130,8 +130,8 @@ pnpm build              # Build all packages
 pnpm test               # Test all packages
 pnpm lint               # Lint all (root + packages)
 pnpm type-check         # Type-check all packages
-pnpm precommit          # build → lint → type-check → test
-pnpm prepack            # lint:check → per-package prepack
+pnpm precommit          # dev:prepare → lint → type-check → build → test
+pnpm prepack            # lint:root:check → per-package prepack
 pnpm test:coverage      # test with istanbul coverage report
 ```
 
@@ -183,7 +183,8 @@ Before committing any changes, ALWAYS run:
 - Check existing code patterns before creating new ones
 - Follow strict TypeScript practices
 - Read design docs before making architectural changes
-- Build before lint (stubs need building first)
+- Run `pnpm dev:prepare` before `lint` or `type-check`
+  (stubs gate cross-package resolution)
 
 ### DON'T
 
