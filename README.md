@@ -82,7 +82,7 @@ plus a unified `api.json` manifest.
 
 ```sh
 pnpm install
-pnpm precommit   # build → lint → type-check → test
+pnpm precommit   # dev:prepare → lint → type-check → build → test
 ```
 
 ## Licence
