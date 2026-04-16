@@ -59,9 +59,9 @@ describe('validateDirectory', () => {
       ...minimalDirectory,
       meta: {
         profiles: {
-          classic: 'Default profile',
-          tlsserver: 'Modern TLS server',
-          shortlived: 'Short-lived certificate',
+          'classic': 'Default profile',
+          'tls-server': 'Modern TLS server',
+          'short-lived': 'Short-lived certificate',
         },
       },
     });
@@ -72,6 +72,59 @@ describe('validateDirectory', () => {
     const result = validateDirectory({
       newNonce: 'https://ca.example/acme/new-nonce',
       newAccount: 'https://ca.example/acme/new-acct',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it.each([
+    'newNonce',
+    'newAccount',
+    'newOrder',
+    'revokeCert',
+    'keyChange',
+  ] as const)(
+    'rejects non-URL %s endpoint',
+    (field) => {
+      const result = validateDirectory({
+        ...minimalDirectory,
+        [field]: 'not a url',
+      });
+      expect(result.success).toBe(false);
+    },
+  );
+
+  it('rejects non-URL newAuthz endpoint', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      newAuthz: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL renewalInfo', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      renewalInfo: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL termsOfService in meta', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      meta: {
+        termsOfService: 'not a url',
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL website in meta', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      meta: {
+        website: 'not a url',
+      },
     });
     expect(result.success).toBe(false);
   });

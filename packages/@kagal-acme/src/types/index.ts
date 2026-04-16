@@ -27,25 +27,30 @@ export {
 
 export {
   asBase64url,
+  asBase64urlAlphabet,
   asPEM,
   type Base64url,
+  type Base64urlAlphabet,
   type PEM,
 } from './encoding';
 
-export type {
-  ACMEProtectedHeader,
-  ACMERequestHeader,
-  FlattenedJWS,
-  JWSProtectedHeader,
-} from './jws';
-
 export {
+  type ACMEProtectedHeader,
+  type ACMERequestHeader,
+  type ACMESignAlgorithm,
+  ACMESignAlgorithms,
+  acmeSignAlgorithms,
   type ECCurve,
   ECCurves,
   ecCurves,
   type ECJWK,
+  type FlattenedJWS,
   type JWK,
   type JWKBase,
+  type JWSAlgorithm,
+  JWSAlgorithms,
+  jwsAlgorithms,
+  type JWSProtectedHeader,
   type OKPCurve,
   OKPCurves,
   okpCurves,
@@ -63,9 +68,11 @@ export type {
   Directory,
   DirectoryMeta,
   DNSChallenge,
+  DNSIdentifier,
   ExternalAccountBinding,
   HTTPChallenge,
   Identifier,
+  IPIdentifier,
   Order,
   Problem,
   RenewalInfo,
@@ -73,16 +80,18 @@ export type {
   TLSALPNChallenge,
 } from './objects';
 
-export type {
-  CRLReasonCode,
-  DeactivateAccount,
-  DeactivateAuthorization,
-  Finalize,
-  KeyChange,
-  NewAccount,
-  NewAuthz,
-  NewOrder,
-  RevokeCert,
+export {
+  type CRLReasonCode,
+  CRLReasonCodes,
+  crlReasonCodes,
+  type DeactivateAccount,
+  type DeactivateAuthorization,
+  type Finalize,
+  type KeyChange,
+  type NewAccount,
+  type NewAuthz,
+  type NewOrder,
+  type RevokeCert,
 } from './requests';
 
 export {

@@ -79,4 +79,22 @@ describe('validateKeyChange', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects non-URL account', () => {
+    // §7.3.5 binds the new key to the account URL —
+    // the only sensible value is a URL.
+    const result = validateKeyChange({
+      account: 'not a url',
+      oldKey: ecKey,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty account', () => {
+    const result = validateKeyChange({
+      account: '',
+      oldKey: ecKey,
+    });
+    expect(result.success).toBe(false);
+  });
 });

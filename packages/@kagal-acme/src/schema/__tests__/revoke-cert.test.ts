@@ -69,4 +69,40 @@ describe('validateRevokeCert', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts every valid reason code', () => {
+    // RFC 5280 §5.3.1 — 0..6, 8, 9, 10 (7 reserved).
+    for (const reason of [0, 1, 2, 3, 4, 5, 6, 8, 9, 10]) {
+      const result = validateRevokeCert({
+        certificate: 'MIICYjCCAUoCAQAwHTEbMBkGA1UE',
+        reason,
+      });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('rejects negative reason code', () => {
+    const result = validateRevokeCert({
+      certificate: 'MIICYjCCAUoCAQAwHTEbMBkGA1UE',
+      reason: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-integer reason code', () => {
+    const result = validateRevokeCert({
+      certificate: 'MIICYjCCAUoCAQAwHTEbMBkGA1UE',
+      reason: 1.5,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects string reason code', () => {
+    // Picklist compares with `===`; '1' is not 1.
+    const result = validateRevokeCert({
+      certificate: 'MIICYjCCAUoCAQAwHTEbMBkGA1UE',
+      reason: '1',
+    });
+    expect(result.success).toBe(false);
+  });
 });

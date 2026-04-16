@@ -38,11 +38,53 @@ export type Base64url = string & {
  *
  * @example
  * ```typescript
- * const tag = asBase64url(row.token);
+ * const nonce = asBase64url(row.nonce);
  * ```
  */
 export function asBase64url(value: string): Base64url {
   return value as Base64url;
+}
+
+/**
+ * String constrained to the base64url alphabet
+ * (RFC 4648 §5) without byte-framing.
+ *
+ * @remarks
+ * RFC 8555 §8.1 describes challenge tokens as values
+ * that "MUST NOT contain any characters outside the
+ * base64url alphabet", with no requirement that the
+ * length be a valid base64 framing — a 25-character
+ * alphabet-only token is conformant. Distinct from
+ * {@link Base64url}, which brands byte-framed,
+ * decodable values.
+ *
+ * Branded `string`. Use for values that are compared
+ * as opaque strings rather than decoded: challenge
+ * tokens, similar random identifiers. Consumers that
+ * decode (via `decodeBase64url`) must demand
+ * {@link Base64url} instead.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc4648#section-5}
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-8.1}
+ */
+export type Base64urlAlphabet = string & {
+  readonly _Base64urlAlphabetBrand: void
+};
+
+/**
+ * Tag `value` as {@link Base64urlAlphabet} without
+ * runtime validation. Use at trust boundaries — after
+ * a known-correct producer or a row validated at
+ * ingest. Untrusted input goes through the schema
+ * layer.
+ *
+ * @example
+ * ```typescript
+ * const token = asBase64urlAlphabet(row.token);
+ * ```
+ */
+export function asBase64urlAlphabet(value: string): Base64urlAlphabet {
+  return value as Base64urlAlphabet;
 }
 
 /**

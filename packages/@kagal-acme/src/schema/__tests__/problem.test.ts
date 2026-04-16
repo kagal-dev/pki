@@ -54,6 +54,40 @@ describe('validateSubproblem', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects instance with whitespace', () => {
+    // RFC 3986 disallows raw whitespace in URI-
+    // references — it must be percent-encoded.
+    const result = validateSubproblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects instance with control characters', () => {
+    // RFC 3986 disallows raw control characters —
+    // must be percent-encoded.
+    const nul = validateSubproblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: '\u0001',
+    });
+    expect(nul.success).toBe(false);
+    const newline = validateSubproblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'a\nb',
+    });
+    expect(newline.success).toBe(false);
+  });
+
+  it('accepts relative URI-reference instance', () => {
+    // RFC 7807 §3.1 permits relative URI-references.
+    const result = validateSubproblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: '/acme/acct/1',
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('validateProblem', () => {
@@ -89,6 +123,48 @@ describe('validateProblem', () => {
     const result = validateProblem({
       type: 'urn:custom:error:something',
       detail: 'Server-defined error',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects instance with whitespace', () => {
+    // RFC 3986 disallows raw whitespace in URI-
+    // references — it must be percent-encoded.
+    const result = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects instance with control characters', () => {
+    // RFC 3986 disallows raw control characters —
+    // must be percent-encoded.
+    const nul = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: '\u0001',
+    });
+    expect(nul.success).toBe(false);
+    const newline = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'a\nb',
+    });
+    expect(newline.success).toBe(false);
+  });
+
+  it('accepts urn: instance (absolute URI)', () => {
+    const result = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'urn:uuid:1234',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts relative URI-reference instance', () => {
+    // RFC 7807 §3.1 permits relative URI-references.
+    const result = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: '/acme/acct/1',
     });
     expect(result.success).toBe(true);
   });

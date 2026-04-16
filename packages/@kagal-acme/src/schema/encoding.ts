@@ -4,8 +4,10 @@ import * as v from 'valibot';
 
 import {
   asBase64url,
+  asBase64urlAlphabet,
   asPEM,
   type Base64url,
+  type Base64urlAlphabet,
   type PEM,
 } from '../types/encoding';
 
@@ -49,6 +51,29 @@ export const Base64urlSchema = v.pipe(
     'invalid base64url length',
   ),
   v.transform((s): Base64url => asBase64url(s)),
+);
+
+/**
+ * {@link Base64urlAlphabet} schema — non-empty string
+ * using the base64url alphabet (RFC 4648 §5), without
+ * the base64 byte-framing check.
+ *
+ * @remarks
+ * Intended for RFC 8555 §8.1 challenge tokens — values
+ * that "MUST NOT contain any characters outside the
+ * base64url alphabet" but are not byte-encoded
+ * payloads. A 25-character alphabet-only token passes
+ * here but would fail {@link Base64urlSchema}'s
+ * `length % 4 !== 1` check, so the two schemas brand
+ * to distinct types.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc4648#section-5}
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-8.1}
+ */
+export const Base64urlAlphabetSchema = v.pipe(
+  v.string(),
+  v.regex(base64url),
+  v.transform((s): Base64urlAlphabet => asBase64urlAlphabet(s)),
 );
 
 /**

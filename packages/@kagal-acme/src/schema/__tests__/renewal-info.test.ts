@@ -74,6 +74,17 @@ describe('validateRenewalInfo', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects non-URL explanationURL', () => {
+    const result = validateRenewalInfo({
+      suggestedWindow: {
+        start: '2026-04-01T00:00:00Z',
+        end: '2026-04-02T00:00:00Z',
+      },
+      explanationURL: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('preserves unknown fields', () => {
     const result = validateRenewalInfo({
       suggestedWindow: {

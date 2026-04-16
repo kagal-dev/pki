@@ -17,6 +17,11 @@ export type ExternalAccountBinding = FlattenedJWS;
 /**
  * ACME account object.
  *
+ * @remarks
+ * RFC 8555 §7.1.2 lists `orders` as required, but
+ * Boulder/Let's Encrypt omit it in account responses.
+ * The field is modelled as optional for interoperability.
+ *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.2}
  */
 export interface Account {
@@ -28,7 +33,7 @@ export interface Account {
   /** EAB JWS (registration only). */
   externalAccountBinding?: ExternalAccountBinding
   /** URL to order list. */
-  orders: string
+  orders?: string
   /** Whether ToS was accepted. */
   termsOfServiceAgreed?: boolean
 };

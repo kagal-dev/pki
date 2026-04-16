@@ -1,6 +1,11 @@
 // JWS types (RFC 7515, RFC 8555)
 
 import type { Base64url } from '../encoding';
+
+import type {
+  ACMESignAlgorithm,
+  JWSAlgorithm,
+} from './alg';
 import type { JWK } from './jwk';
 
 /**
@@ -27,11 +32,17 @@ export interface FlattenedJWS {
 /**
  * JWS protected header (RFC 7515 §4.1).
  *
+ * @remarks
+ * The library uses this for EAB and key-change inner
+ * JWS objects, which don't carry the ACME-specific
+ * `nonce`/`url` fields. Outer ACME requests use
+ * {@link ACMEProtectedHeader}.
+ *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7515#section-4.1}
  */
 export interface JWSProtectedHeader {
-  /** Signature algorithm (e.g. 'ES256', 'EdDSA'). */
-  alg: string
+  /** Signature algorithm. */
+  alg: JWSAlgorithm
   /** JSON Web Key (RFC 7515 §4.1.3). */
   jwk?: JWK
   /** Key ID (RFC 7515 §4.1.4). */
@@ -43,15 +54,18 @@ export interface JWSProtectedHeader {
  *
  * @remarks
  * Extends {@link JWSProtectedHeader} with ACME-required
- * `nonce` and `url`. Inner JWS objects (EAB, key change)
- * omit `nonce` and use {@link JWSProtectedHeader} directly.
+ * `nonce` and `url`. Narrows `alg` to
+ * {@link ACMESignAlgorithm} — RFC 8555 §6.2 forbids
+ * MAC-based algorithms on the outer JWS.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-6.2}
  */
 export interface ACMEProtectedHeader
   extends JWSProtectedHeader {
+  /** Asymmetric signature algorithm. */
+  alg: ACMESignAlgorithm
   /** Anti-replay nonce (RFC 8555 §6.5). */
-  nonce: string
+  nonce: Base64url
   /** Request URL (RFC 8555 §6.4). */
   url: string
 };
