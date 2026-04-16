@@ -1,6 +1,8 @@
 // ACME challenge types (RFC 8555 §7.1.5, RFC 8737)
 
 import type { ChallengeStatus } from '../constants/status';
+import type { Base64url } from '../encoding';
+
 import type { Problem } from './problem';
 
 /**
@@ -27,7 +29,8 @@ export interface ChallengeBase {
 export type HTTPChallenge = ChallengeBase & {
   type: 'http-01'
 
-  token: string
+  /** Base64url random (RFC 8555 §8.1). */
+  token: Base64url
 };
 
 /**
@@ -38,7 +41,8 @@ export type HTTPChallenge = ChallengeBase & {
 export type DNSChallenge = ChallengeBase & {
   type: 'dns-01'
 
-  token: string
+  /** Base64url random (RFC 8555 §8.1). */
+  token: Base64url
 };
 
 /**
@@ -49,7 +53,8 @@ export type DNSChallenge = ChallengeBase & {
 export type TLSALPNChallenge = ChallengeBase & {
   type: 'tls-alpn-01'
 
-  token: string
+  /** Base64url random (RFC 8555 §8.1). */
+  token: Base64url
 };
 
 /**

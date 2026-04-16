@@ -17,7 +17,9 @@ export type {
 export type {
   NewOrder,
 } from './new-order';
-export type {
-  CRLReasonCode,
-  RevokeCert,
+export {
+  type CRLReasonCode,
+  CRLReasonCodes,
+  crlReasonCodes,
+  type RevokeCert,
 } from './revoke-cert';

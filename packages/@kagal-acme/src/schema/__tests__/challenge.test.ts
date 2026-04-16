@@ -10,7 +10,7 @@ describe('validateChallenge', () => {
       type: 'http-01',
       url: 'https://ca.example/chall/1',
       status: 'pending',
-      token: 'abc123',
+      token: 'abc123abc123abc123abc123',
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -23,7 +23,7 @@ describe('validateChallenge', () => {
       type: 'dns-01',
       url: 'https://ca.example/chall/2',
       status: 'valid',
-      token: 'def456',
+      token: 'def456def456def456def456',
       validated: '2026-03-28T12:00:00Z',
     });
     expect(result.success).toBe(true);
@@ -34,7 +34,7 @@ describe('validateChallenge', () => {
       type: 'tls-alpn-01',
       url: 'https://ca.example/chall/3',
       status: 'processing',
-      token: 'ghi789',
+      token: 'ghi789ghi789ghi789ghi789',
     });
     expect(result.success).toBe(true);
   });
@@ -44,7 +44,7 @@ describe('validateChallenge', () => {
       type: 'http-01',
       url: 'https://ca.example/chall/4',
       status: 'invalid',
-      token: 'xyz',
+      token: 'xyz789xyz789xyz789xyz789',
       error: {
         type: 'urn:ietf:params:acme:error:connection',
         detail: 'Connection refused',
@@ -86,12 +86,76 @@ describe('validateChallenge', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects non-URL challenge url', () => {
+    const result = validateChallenge({
+      type: 'http-01',
+      url: 'not a url',
+      status: 'pending',
+      token: 'abc123abc123abc123abc123',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp validated', () => {
+    const result = validateChallenge({
+      type: 'http-01',
+      url: 'https://ca.example/chall/1',
+      status: 'valid',
+      token: 'abc123abc123abc123abc123',
+      validated: 'yesterday',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects token shorter than 128 bits of entropy', () => {
+    // §8.1 — token MUST carry ≥ 128 bits of entropy.
+    // Base64url-encoded, that's 22 characters.
+    const result = validateChallenge({
+      type: 'http-01',
+      url: 'https://ca.example/chall/1',
+      status: 'pending',
+      token: 'abc123abc123abc', // 15 chars — valid format, too short.
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-base64url token', () => {
+    // §8.1 — token MUST be base64url.
+    const result = validateChallenge({
+      type: 'http-01',
+      url: 'https://ca.example/chall/1',
+      status: 'pending',
+      token: 'has space',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty token', () => {
+    const result = validateChallenge({
+      type: 'http-01',
+      url: 'https://ca.example/chall/1',
+      status: 'pending',
+      token: '',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects token with standard-base64 `+`', () => {
+    const result = validateChallenge({
+      type: 'http-01',
+      url: 'https://ca.example/chall/1',
+      status: 'pending',
+      token: 'abc+def',
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('preserves unknown fields', () => {
     const result = validateChallenge({
       type: 'http-01',
       url: 'https://ca.example/chall/8',
       status: 'pending',
-      token: 'abc',
+      token: 'abc123abc123abc123abc123',
       futureField: 42,
     });
     expect(result.success).toBe(true);

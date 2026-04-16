@@ -11,7 +11,7 @@ const basePayload = {
       type: 'http-01' as const,
       url: 'https://ca.example/chall/1',
       status: 'pending' as const,
-      token: 'abc123',
+      token: 'abc123abc123abc123abc123',
     },
   ],
 };
@@ -104,6 +104,33 @@ describe('validateAuthorization', () => {
         value: 'example.com',
       },
       status: 'pending',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp expires on valid', () => {
+    const result = validateAuthorization({
+      ...basePayload,
+      status: 'valid',
+      expires: 'tomorrow',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp expires on pending', () => {
+    const result = validateAuthorization({
+      ...basePayload,
+      status: 'pending',
+      expires: '2026/04/28',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp expires on expired', () => {
+    const result = validateAuthorization({
+      ...basePayload,
+      status: 'expired',
+      expires: 'yesterday',
     });
     expect(result.success).toBe(false);
   });

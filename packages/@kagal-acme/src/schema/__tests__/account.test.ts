@@ -83,6 +83,43 @@ describe('validateAccount', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects non-URL orders', () => {
+    const result = validateAccount({
+      status: 'valid',
+      orders: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty orders', () => {
+    const result = validateAccount({
+      status: 'valid',
+      orders: '',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URI contact entry', () => {
+    const result = validateAccount({
+      status: 'valid',
+      orders: 'https://ca.example/acct/1/orders',
+      contact: ['admin@example.com'],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts tel: contact (non-mailto URI)', () => {
+    // §7.3 lists mailto as the standard scheme but
+    // doesn't forbid others — the URL parser accepts
+    // any absolute URI.
+    const result = validateAccount({
+      status: 'valid',
+      orders: 'https://ca.example/acct/1/orders',
+      contact: ['tel:+1-555-0100'],
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('preserves unknown fields', () => {
     const result = validateAccount({
       status: 'valid',

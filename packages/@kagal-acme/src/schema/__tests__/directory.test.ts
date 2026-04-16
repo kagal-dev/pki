@@ -76,6 +76,42 @@ describe('validateDirectory', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects non-URL operation endpoint', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      newNonce: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL renewalInfo', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      renewalInfo: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL termsOfService in meta', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      meta: {
+        termsOfService: 'not a url',
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL website in meta', () => {
+    const result = validateDirectory({
+      ...minimalDirectory,
+      meta: {
+        website: 'not a url',
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('preserves unknown fields', () => {
     const result = validateDirectory({
       ...minimalDirectory,

@@ -54,6 +54,14 @@ describe('validateSubproblem', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects non-URL instance', () => {
+    const result = validateSubproblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('validateProblem', () => {
@@ -89,6 +97,23 @@ describe('validateProblem', () => {
     const result = validateProblem({
       type: 'urn:custom:error:something',
       detail: 'Server-defined error',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects non-URL instance', () => {
+    const result = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts urn: instance (absolute URI)', () => {
+    // URL parser accepts any absolute URI scheme.
+    const result = validateProblem({
+      type: 'urn:ietf:params:acme:error:malformed',
+      instance: 'urn:uuid:1234',
     });
     expect(result.success).toBe(true);
   });

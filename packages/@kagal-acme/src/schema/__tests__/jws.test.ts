@@ -127,9 +127,51 @@ describe('validateJWSProtectedHeader', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts HS256 (EAB inner)', () => {
+    // RFC 8555 §7.3.4 EAB uses MAC-based algorithms
+    // — JWSProtectedHeader is used for the inner JWS.
+    const result = validateJWSProtectedHeader({
+      alg: 'HS256',
+      kid: 'eab-key-id',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts EdDSA', () => {
+    const result = validateJWSProtectedHeader({
+      alg: 'EdDSA',
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('rejects missing alg', () => {
     const result = validateJWSProtectedHeader({
       kid: 'https://ca.example/acct/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects alg: none', () => {
+    // RFC 7518 registers `none` but ACME JWS always
+    // carries a signature — the picklist excludes it
+    // on purpose.
+    const result = validateJWSProtectedHeader({
+      alg: 'none',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unregistered alg', () => {
+    const result = validateJWSProtectedHeader({
+      alg: 'HS999',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty kid', () => {
+    const result = validateJWSProtectedHeader({
+      alg: 'ES256',
+      kid: '',
     });
     expect(result.success).toBe(false);
   });
@@ -191,6 +233,83 @@ describe('validateACMEProtectedHeader', () => {
   it('rejects missing alg', () => {
     const result = validateACMEProtectedHeader({
       nonce: 'abc123',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects HS256 (MAC-based alg on outer JWS)', () => {
+    // RFC 8555 §6.2 forbids MAC-based algorithms on
+    // the outer ACME request. HS* is fine on the
+    // inner JWSProtectedHeader (EAB, §7.3.4) but not
+    // here.
+    const result = validateACMEProtectedHeader({
+      alg: 'HS256',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'abc123',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects alg: none', () => {
+    const result = validateACMEProtectedHeader({
+      alg: 'none',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'abc123',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL kid', () => {
+    // §6.2: kid MUST contain the account URL.
+    const result = validateACMEProtectedHeader({
+      alg: 'ES256',
+      kid: 'not a url',
+      nonce: 'abc123',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL url', () => {
+    const result = validateACMEProtectedHeader({
+      alg: 'ES256',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'abc123',
+      url: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-base64url nonce', () => {
+    // §6.5: nonce MUST be a base64url-encoded
+    // octet string.
+    const result = validateACMEProtectedHeader({
+      alg: 'ES256',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'has space',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty nonce', () => {
+    const result = validateACMEProtectedHeader({
+      alg: 'ES256',
+      kid: 'https://ca.example/acct/1',
+      nonce: '',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects nonce with standard-base64 `+`', () => {
+    const result = validateACMEProtectedHeader({
+      alg: 'ES256',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'abc+def',
       url: 'https://ca.example/order/1',
     });
     expect(result.success).toBe(false);
@@ -278,6 +397,36 @@ describe('validateACMERequestHeader', () => {
       alg: 'ES256',
       kid: 'https://ca.example/acct/1',
       nonce: 'abc123',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL kid', () => {
+    const result = validateACMERequestHeader({
+      alg: 'ES256',
+      kid: 'not a url',
+      nonce: 'abc123',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects HS256 (MAC-based alg on outer JWS)', () => {
+    const result = validateACMERequestHeader({
+      alg: 'HS256',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'abc123',
+      url: 'https://ca.example/order/1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-base64url nonce', () => {
+    const result = validateACMERequestHeader({
+      alg: 'ES256',
+      kid: 'https://ca.example/acct/1',
+      nonce: 'has space',
+      url: 'https://ca.example/order/1',
     });
     expect(result.success).toBe(false);
   });

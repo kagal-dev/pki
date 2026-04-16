@@ -2,6 +2,8 @@
 
 import * as v from 'valibot';
 
+import { crlReasonCodes } from '../types/requests/revoke-cert';
+
 import { Base64urlSchema } from './encoding';
 
 /**
@@ -9,15 +11,15 @@ import { Base64urlSchema } from './encoding';
  *
  * @remarks
  * Uses `strictObject` — only `certificate` and
- * optional `reason` are expected.
+ * optional `reason` are expected. `reason` picks
+ * from the {@link crlReasonCodes} tuple so the
+ * runtime values stay locked to the
+ * {@link CRLReasonCode} type (RFC 5280 §5.3.1;
+ * code 7 is reserved and excluded).
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-7.6}
  */
 export const RevokeCertSchema = v.strictObject({
   certificate: Base64urlSchema,
-  reason: v.optional(v.pipe(
-    v.number(),
-    v.integer(),
-    v.picklist([0, 1, 2, 3, 4, 5, 6, 8, 9, 10]),
-  )),
+  reason: v.optional(v.picklist(crlReasonCodes)),
 });

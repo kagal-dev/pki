@@ -20,7 +20,9 @@ export type {
   DirectoryMeta,
 } from './directory';
 export type {
+  DNSIdentifier,
   Identifier,
+  IPIdentifier,
 } from './identifier';
 export type {
   Order,
