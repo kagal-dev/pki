@@ -6,17 +6,21 @@ with code in the kagal-dev/pki monorepo.
 
 ## Project Overview
 
-This monorepo contains four MIT-licensed TypeScript
+This monorepo contains the MIT-licensed TypeScript
 packages for PKI (Public Key Infrastructure):
 
 - **`@kagal/acme`** — platform-neutral ACME protocol
   library (RFC 8555)
 - **`@kagal/ct`** — platform-neutral Certificate
   Transparency types and schema validators (RFC 9162)
+- **`@kagal/securelog`** *(planned)* — Ma–Tsudik dual-MAC
+  append-only audit log; used by the CA signer alongside
+  CT
 - **`@kagal/ca`** — challenge-less, EAB-driven private
   CA engine for Cloudflare Workers
-- **`@kagal/build-tsdocs`** — TSDoc extraction hook for
-  unbuild, used across the other packages
+- **`@kagal/build-tsdocs`** *(leaving this repo)* — TSDoc
+  extraction hook for unbuild, currently used across the
+  other packages
 
 The packages follow a strict layering:
 
@@ -25,14 +29,15 @@ consumer Worker (embeds @kagal/ca)
       │ depends on
       ▼
 @kagal/ca (Cloudflare-specific orchestrator)
-      │ depends on
-      ▼
-@kagal/acme (platform-agnostic protocol library)
+      ├── server sub-path → @kagal/acme
+      └── signer sub-path → @kagal/ct
+                            @kagal/securelog (planned)
 ```
 
-Each layer depends downward only. `@kagal/acme` knows
-nothing about `@kagal/ca`. `@kagal/ca` knows nothing
-about the consumer application.
+Each layer depends downward only. `@kagal/acme` and
+`@kagal/ct` know nothing about `@kagal/ca`.
+`@kagal/ca` knows nothing about the consumer
+application.
 
 ## Monorepo Structure
 
@@ -47,7 +52,7 @@ pki/
 │   │       ├── utils/         # Sub-path: @kagal/acme/utils
 │   │       ├── client/        # Sub-path: @kagal/acme/client
 │   │       └── server/        # Sub-path: @kagal/acme/server
-│   ├── @kagal-build-tsdocs/   # @kagal/build-tsdocs
+│   ├── @kagal-build-tsdocs/   # @kagal/build-tsdocs (leaving this repo)
 │   │   └── src/
 │   │       ├── index.ts       # newDocumentsHook(), VERSION
 │   │       ├── types.ts       # Manifest types, DocEntry re-export
@@ -56,12 +61,17 @@ pki/
 │   ├── @kagal-ca/             # @kagal/ca
 │   │   └── src/
 │   │       ├── index.ts       # Root entry (VERSION, CAEnv)
-│   │       └── types.ts       # Cloudflare environment bindings
-│   └── @kagal-ct/             # @kagal/ct
-│       └── src/
-│           ├── index.ts       # Root entry (VERSION)
-│           ├── types/         # Sub-path: @kagal/ct/types
-│           └── schema/        # Sub-path: @kagal/ct/schema
+│   │       ├── types.ts       # Cloudflare environment bindings
+│   │       ├── config.ts      # Paths + directory config
+│   │       ├── signer/        # Sub-path: @kagal/ca/signer
+│   │       └── server/        # Sub-path: @kagal/ca/server
+│   ├── @kagal-ct/             # @kagal/ct
+│   │   └── src/
+│   │       ├── index.ts       # Root entry (VERSION)
+│   │       ├── types/         # Sub-path: @kagal/ct/types
+│   │       └── schema/        # Sub-path: @kagal/ct/schema
+│   └── @kagal-securelog/      # @kagal/securelog (planned, Phase 1)
+│       └── src/               # Ma–Tsudik dual-MAC append-only log
 ├── docs/                      # Design documents (not published)
 ├── .github/workflows/         # CI/CD
 ├── pnpm-workspace.yaml
@@ -96,15 +106,18 @@ patterns and conventions.
 protocol logic lives in `@kagal/acme/server`. The CA
 provides:
 
-- **ACME surface** — HTTP layer, deps wiring, state
+- **ACME surface** — request intake, deps wiring, state
   persistence, alarm scheduling
 - **Management plane (RPC)** — EAB provisioning,
   identity enrolment, direct issuance, revocation
 - **PKI endpoints** — CA chain, CRL, Certificate
-  Transparency log (RFC 6962) with SCT embedding
+  Transparency log (RFC 9162) with SCT embedding
 
-It runs as a single Durable Object per CA with SQLite
-storage.
+It runs as a set of Durable Objects: a singleton
+SignerDO (keys, signing, CT, CRL) and per-resource
+ACME DOs (accounts, orders, authorisations), each with
+its own SQLite. The `Signer` interface is pluggable —
+`SignerDO` is the reference implementation.
 
 ## Reference RFCs
 

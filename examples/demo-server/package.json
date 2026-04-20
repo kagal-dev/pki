@@ -1,0 +1,24 @@
+{
+  "name": "@kagal/demo-ca-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "lint": "eslint --fix .",
+    "lint:check": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kagal/ca": "workspace:^",
+    "consola": "^3.4.2",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260317.1",
+    "@poupe/eslint-config": "^0.8.4",
+    "eslint": "^9.39.4",
+    "wrangler": "^4.20.0"
+  }
+}

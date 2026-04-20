@@ -1,0 +1,25 @@
+{
+  "name": "kagal-demo-server",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-12",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "kv_namespaces": [
+    { "binding": "CA_REGISTRY", "id": "demo-ca-kv" }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "CA_SIGNER", "class_name": "SignerDO" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["SignerDO"] }
+  ],
+  "vars": {
+    "CA_KEK_v1": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE"
+  },
+  "dev": {
+    "ip": "0.0.0.0"
+  }
+}

@@ -2,6 +2,7 @@
 // Not used for deployment.
 {
   "name": "kagal-ca-test",
+  "main": "src/server/__tests__/worker.ts",
   "compatibility_date": "2026-03-12",
   "compatibility_flags": [
     "nodejs_compat",
@@ -14,5 +15,16 @@
   ],
   "kv_namespaces": [
     { "binding": "CA_REGISTRY", "id": "ca-test-kv" }
-  ]
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "CA_SIGNER", "class_name": "SignerDO" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["SignerDO"] }
+  ],
+  "vars": {
+    "CA_KEK_v1": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE"
+  }
 }

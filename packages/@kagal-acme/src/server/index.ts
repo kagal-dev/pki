@@ -1,2 +1,10 @@
 // @kagal/acme/server — server state machines
-export { VERSION } from '..';
+
+export type {
+  AcmeResponse,
+  PolicyCheck,
+  ServerConfig,
+  ServerEvent,
+  ServerMachine,
+  ServerResult,
+} from './types';

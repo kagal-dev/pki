@@ -1,2 +1,8 @@
 // @kagal/acme/client — client state machines
-export { VERSION } from '..';
+
+export type {
+  Client,
+  ClientConfig,
+  ClientPhase,
+  ClientState,
+} from './types';
