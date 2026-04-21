@@ -12,10 +12,11 @@ The `/types` sub-path has zero runtime dependencies.
 The `/schema` sub-path depends only on Valibot.
 The `/utils` sub-path uses WebCrypto and
 `btoa`/`atob` for base64url codec, random bytes,
-and RFC 7638 JWK thumbprint, and `/schema` for
-JWK parse-and-brand (`parseJWK`). It will extend
-with `@peculiar/x509` + `pkijs` for CSR, cert, and
-ARI helpers.
+and RFC 7638 JWK thumbprint; `jose` for WebCrypto
+JWK export; and `/schema` for JWK parse-and-brand
+(`parseJWK`, `exportJWK`). It will extend with
+`@peculiar/x509` + `pkijs` for CSR, cert, and ARI
+helpers.
 The `/client` and `/server` sub-paths compose
 `/schema` and `/utils`.
 
@@ -27,7 +28,7 @@ The `/client` and `/server` sub-paths compose
 |--------|---------|
 | `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet, branded strings, `narrow()` |
 | `@kagal/acme/schema` | Valibot validators conforming to `/types` |
-| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK parse |
+| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse |
 | `@kagal/acme/client` | Stub — no surface yet |
 | `@kagal/acme/server` | Stub — no surface yet |
 

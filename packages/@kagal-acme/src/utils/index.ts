@@ -10,4 +10,4 @@ export {
   getRandom,
 } from './encoding';
 
-export { jwkThumbprint, parseJWK } from './jwk';
+export { exportJWK, jwkThumbprint, parseJWK } from './jwk';

@@ -19,7 +19,7 @@ Sub-path exports:
 |--------|-------------|------|
 | `@kagal/acme/types` | Interfaces, const tuples, `ReadonlySet` constants | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK parse | WebCrypto, /schema |
+| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK export / parse | WebCrypto, jose, /schema |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
 

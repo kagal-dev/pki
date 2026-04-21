@@ -12,7 +12,7 @@ utilities.
 |--------|-------------|--------------|
 | `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet constants, branded `Base64url` / `PEM` | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK parse | WebCrypto, /schema |
+| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse | WebCrypto, jose, /schema |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
 
@@ -46,7 +46,8 @@ client  server   protocol state machines
 `/schema` validators return the hand-written types
 from `/types`, not Valibot's inferred output.
 `/utils` uses `/schema` internally for the
-decode → validate → verify pipeline (`parseJWK`).
+decode → validate → verify pipeline (`parseJWK`,
+`exportJWK`).
 
 Encoding contracts cross the layer boundary as
 branded strings: `@kagal/acme/types` exports

@@ -1,4 +1,7 @@
-// JWK utilities — thumbprints (RFC 7638), generic parse.
+// JWK utilities — thumbprints (RFC 7638),
+// WebCrypto export, generic parse.
+
+import { exportJWK as joseExportJWK } from 'jose';
 
 import type { Base64url } from '../types/encoding';
 import type { JWK } from '../types/jws/jwk';
@@ -32,6 +35,31 @@ export function parseJWK(input: unknown): JWK {
     throw new TypeError('invalid JWK', { cause: result.issues });
   }
   return result.data;
+}
+
+/**
+ * Export a {@link CryptoKey} as a branded {@link JWK}.
+ *
+ * @remarks
+ * Delegates to `jose.exportJWK` for the
+ * `CryptoKey → JWK` conversion (handles the Node /
+ * Workers / browser quirks) and validates the result
+ * via {@link parseJWK}. WebCrypto is a trusted producer,
+ * but validation ensures the output carries the
+ * `Base64url` brand on coord / modulus members rather
+ * than relying on an unchecked cast.
+ *
+ * @throws `TypeError` if the exported JWK fails schema
+ *   validation (e.g. an unsupported `kty` slips through
+ *   a non-standard WebCrypto implementation).
+ *
+ * @throws Any `DOMException` WebCrypto raises
+ *   (non-extractable key, unsupported algorithm, …) —
+ *   propagated unchanged.
+ */
+export async function exportJWK(key: CryptoKey): Promise<JWK> {
+  const raw = await joseExportJWK(key);
+  return parseJWK(raw);
 }
 
 /**

@@ -74,7 +74,7 @@ pki/
 |--------|---------|--------------|
 | `@kagal/acme/types` | Types, const tuples, ReadonlySet, `narrow()` | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK parse, `mustMembers` | WebCrypto, /schema |
+| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK export / parse, `mustMembers` | WebCrypto, jose, /schema |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
 
