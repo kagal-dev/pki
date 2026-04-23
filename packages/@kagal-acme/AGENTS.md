@@ -111,23 +111,32 @@ Utility functions (e.g. `narrow()`) live in
 
 ### Branded strings
 
-[`Base64url`][encoding] and [`PEM`][encoding] are
-branded `string` types — intersections such as
+[`Base64url`][encoding], [`Base64urlAlphabet`][encoding],
+and [`PEM`][encoding] are branded `string` types —
+intersections such as
 `string & { readonly _Base64urlBrand: void }`,
 keyed by string-named phantom properties. String
 keys (not a `unique symbol` — see the
 [rationale comment in `types/encoding.ts`][encoding])
 so the brand is nameable across module boundaries
-without TS4023 on declaration emit.
+without TS4023 on declaration emit. `Base64urlAlphabet`
+is the alphabet-only sibling of `Base64url`: it
+constrains characters to the RFC 4648 §5 alphabet
+without requiring byte-framed length, which is what
+RFC 8555 §8.1 calls for on `Challenge.token` ("only
+characters in the base64url alphabet", no
+decode-framing guarantee).
 Producers in `/utils` (`encodeBase64url`,
 `getRandom`, `jwkThumbprint`) return the brand
 directly; the matching schemas
 ([`Base64urlSchema`][s-encoding],
+[`Base64urlAlphabetSchema`][s-encoding],
 [`PEMSchema`][s-encoding]) transform to the brand
 on the last pipe step. Plain `string` cannot be
 assigned to a branded slot — consumers must go
-through an accessor (`asBase64url` / `asPEM`), a
-producer, or a schema.
+through an accessor (`asBase64url`,
+`asBase64urlAlphabet`, `asPEM`), a producer, or a
+schema.
 
 The accessors are unvalidated — use them only at
 trust boundaries (known-correct encoder output,
