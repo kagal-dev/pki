@@ -80,12 +80,9 @@ export function decodeBase64url(input: string): ArrayBuffer {
   const binary = atob(standard);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
-    // `atob` output is a binary string of single code
-    // units in [0, 255]; `codePointAt` is always
-    // defined here. The `?? 0` satisfies the static
-    // type (`number | undefined`) without a non-null
-    // assertion.
-    bytes[i] = binary.codePointAt(i) ?? 0;
+    // `atob` output bytes are ≤ 0xFF — no surrogates.
+    // eslint-disable-next-line unicorn/prefer-code-point
+    bytes[i] = binary.charCodeAt(i);
   }
   return bytes.buffer as ArrayBuffer;
 }

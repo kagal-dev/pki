@@ -10,7 +10,7 @@ utilities.
 
 | Export | Description | Dependencies |
 |--------|-------------|--------------|
-| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet constants, branded `Base64url` / `PEM` | none |
+| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet constants, branded `Base64url` / `Base64urlAlphabet` / `PEM` | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
 | `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse | WebCrypto, jose, /schema |
 | `@kagal/acme/client` | Stub — no surface yet | none |
@@ -51,12 +51,16 @@ decode → validate → verify pipeline (`parseJWK`,
 
 Encoding contracts cross the layer boundary as
 branded strings: `@kagal/acme/types` exports
-`Base64url` and `PEM`, and every `/utils` producer
-and `/schema` validator returns the brand. Plain
-`string` cannot be assigned to a branded slot —
-use a producer, a validator, or the unvalidated
-`asBase64url` / `asPEM` accessor at a trust
-boundary.
+`Base64url`, `Base64urlAlphabet`, and `PEM`, and every
+`/utils` producer and `/schema` validator returns the
+brand. `Base64urlAlphabet` is the alphabet-only sibling
+of `Base64url` — used for `Challenge.token` (RFC 8555
+§8.1), where the wire format constrains characters to
+the base64url alphabet but does not carry a byte-framed
+length. Plain `string` cannot be assigned to a branded
+slot — use a producer, a validator, or the unvalidated
+`asBase64url` / `asBase64urlAlphabet` / `asPEM`
+accessor at a trust boundary.
 
 Type-only consumers add `@kagal/acme` as a
 `devDependency` and import from `/types`.
