@@ -19,12 +19,14 @@ const SuggestedWindowSchema = v.pipe(
  *
  * @remarks
  * Uses `looseObject` — unknown fields pass through.
+ * `explanationURL` is validated via the WHATWG `URL`
+ * parser.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc9773#section-4}
  */
 export const RenewalInfoSchema = v.looseObject({
   suggestedWindow: SuggestedWindowSchema,
-  explanationURL: v.optional(v.string()),
+  explanationURL: v.optional(v.pipe(v.string(), v.url())),
 });
 
 /**

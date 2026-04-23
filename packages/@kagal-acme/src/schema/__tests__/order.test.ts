@@ -116,6 +116,55 @@ describe('validateOrder', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects non-URL finalize', () => {
+    const result = validateOrder({
+      ...minimalOrder,
+      finalize: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL authorization entry', () => {
+    const result = validateOrder({
+      ...minimalOrder,
+      authorizations: ['not a url'],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-URL certificate', () => {
+    const result = validateOrder({
+      ...minimalOrder,
+      status: 'valid',
+      certificate: 'not a url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp expires', () => {
+    const result = validateOrder({
+      ...minimalOrder,
+      expires: 'yesterday',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp notBefore', () => {
+    const result = validateOrder({
+      ...minimalOrder,
+      notBefore: '2026/03/28',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-timestamp notAfter', () => {
+    const result = validateOrder({
+      ...minimalOrder,
+      notAfter: 'soon',
+    });
+    expect(result.success).toBe(false);
+  });
+
   it('preserves unknown fields', () => {
     const result = validateOrder({
       ...minimalOrder,

@@ -6,15 +6,52 @@ import {
   challengeStatuses,
 } from '../types/constants/status';
 
+import { Base64urlAlphabetSchema } from './encoding';
 import { ProblemSchema } from './problem';
 
-/** Shared challenge fields. */
+/**
+ * Minimum base64url-alphabet length for a challenge
+ * token.
+ *
+ * @remarks
+ * RFC 8555 §8.1 requires ≥ 128 bits of entropy.
+ * Base64url encodes 6 bits per character, so 128
+ * bits → ⌈128 / 6⌉ = 22 unpadded characters.
+ */
+const minChallengeTokenLength = 22;
+
+/**
+ * Challenge token schema — base64url-alphabet string
+ * carrying ≥ 128 bits of entropy (RFC 8555 §8.1).
+ *
+ * @remarks
+ * Output is branded {@link Base64urlAlphabet} — the
+ * token is alphabet-constrained but not byte-framed,
+ * so it does not round-trip through
+ * `decodeBase64url`. See {@link Base64urlAlphabet} vs
+ * {@link Base64url} for the distinction.
+ */
+const ChallengeTokenSchema = v.pipe(
+  Base64urlAlphabetSchema,
+  v.minLength(minChallengeTokenLength),
+);
+
+/**
+ * Shared challenge fields.
+ *
+ * @remarks
+ * `url` is an operation URL; `validated` is an RFC
+ * 3339 timestamp; `token` is a base64url-alphabet
+ * string ≥ 22 characters (128 bits of entropy) per
+ * RFC 8555 §8.1, outputting the branded
+ * {@link Base64urlAlphabet} type.
+ */
 const challengeBase = {
-  url: v.string(),
+  url: v.pipe(v.string(), v.url()),
   status: v.picklist(challengeStatuses),
-  validated: v.optional(v.string()),
+  validated: v.optional(v.pipe(v.string(), v.isoTimestamp())),
   error: v.optional(ProblemSchema),
-  token: v.string(),
+  token: ChallengeTokenSchema,
 };
 
 /**

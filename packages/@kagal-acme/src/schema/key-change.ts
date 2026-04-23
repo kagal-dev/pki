@@ -9,11 +9,13 @@ import { JWKSchema } from './jwk';
  *
  * @remarks
  * Uses `strictObject` — the inner JWS payload has
- * exactly two fields.
+ * exactly two fields. `account` is the account URL
+ * (§7.3.5 binds the new key to that URL, so a URL
+ * is the only sensible value).
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-7.3.5}
  */
 export const KeyChangeSchema = v.strictObject({
-  account: v.string(),
+  account: v.pipe(v.string(), v.url()),
   oldKey: JWKSchema,
 });

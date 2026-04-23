@@ -74,9 +74,17 @@ pki/
 |--------|---------|--------------|
 | `@kagal/acme/types` | Types, const tuples, ReadonlySet, `narrow()` | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | CSR parsing, cert inspection, ARI cert ID | valibot, WebCrypto |
-| `@kagal/acme/client` | Client state machines | /schema, /utils (valibot, WebCrypto) |
-| `@kagal/acme/server` | Server state machines | /schema, /utils (valibot, WebCrypto) |
+| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK export / parse, `mustMembers` | WebCrypto, jose, /schema |
+| `@kagal/acme/client` | Stub — no surface yet | none |
+| `@kagal/acme/server` | Stub — no surface yet | none |
+
+Planned:
+
+| Export | Purpose | Runtime deps |
+|--------|---------|--------------|
+| `@kagal/acme/utils` | + CSR parsing, cert inspection, ARI cert ID, PEM helpers | + @peculiar/x509, pkijs |
+| `@kagal/acme/client` | + Client state machines | /schema, /utils |
+| `@kagal/acme/server` | + Server state machines | /schema, /utils |
 
 The root export (`@kagal/acme`) re-exports types +
 client + server. It does NOT re-export schema or utils.
@@ -130,8 +138,8 @@ pnpm build              # Build all packages
 pnpm test               # Test all packages
 pnpm lint               # Lint all (root + packages)
 pnpm type-check         # Type-check all packages
-pnpm precommit          # build → lint → type-check → test
-pnpm prepack            # lint:check → per-package prepack
+pnpm precommit          # dev:prepare → lint → type-check → build → test
+pnpm prepack            # lint:root:check → per-package prepack
 pnpm test:coverage      # test with istanbul coverage report
 ```
 
@@ -183,7 +191,8 @@ Before committing any changes, ALWAYS run:
 - Check existing code patterns before creating new ones
 - Follow strict TypeScript practices
 - Read design docs before making architectural changes
-- Build before lint (stubs need building first)
+- Run `pnpm dev:prepare` before `lint` or `type-check`
+  (stubs gate cross-package resolution)
 
 ### DON'T
 

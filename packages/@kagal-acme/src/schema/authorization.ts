@@ -23,13 +23,17 @@ const authorizationBase = {
   wildcard: v.optional(v.boolean()),
 };
 
+/** RFC 3339 timestamp schema — reused on all branches. */
+const expiresTimestamp = v.pipe(v.string(), v.isoTimestamp());
+
 /**
  * {@link Authorization} schema — discriminated on
  * `status`.
  *
  * @remarks
  * Uses `looseObject` — unknown fields pass through.
- * `expires` is required when status is `'valid'`.
+ * `expires` is required when status is `'valid'` and
+ * always an RFC 3339 timestamp when present.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.4}
  */
@@ -37,16 +41,16 @@ export const AuthorizationSchema = v.variant('status', [
   v.looseObject({
     ...authorizationBase,
     status: v.literal('pending'),
-    expires: v.optional(v.string()),
+    expires: v.optional(expiresTimestamp),
   }),
   v.looseObject({
     ...authorizationBase,
     status: v.literal('valid'),
-    expires: v.string(),
+    expires: expiresTimestamp,
   }),
   v.looseObject({
     ...authorizationBase,
     status: v.picklist(authorizationOtherStatuses),
-    expires: v.optional(v.string()),
+    expires: v.optional(expiresTimestamp),
   }),
 ]);

@@ -1,0 +1,35 @@
+{
+  "version": "0.2",
+  "language": "en-GB",
+  "ignoreRegExpList": [
+    "/['\"`][A-Za-z0-9+/_=-]{16,}['\"`]/g"
+  ],
+  "words": [
+    "apptly",
+    "base64url",
+    "consola",
+    "dnsname",
+    "ecdsa",
+    "eddsa",
+    "jose",
+    "kagal",
+    "merkle",
+    "picklist",
+    "pkijs",
+    "poupe",
+    "prepack",
+    "rsassa",
+    "subpath",
+    "subpaths",
+    "subproblem",
+    "thumbprint",
+    "thumbprinting",
+    "tsdocs",
+    "unbuild",
+    "valibot",
+    "webcrypto",
+    "whatwg",
+    "workerd",
+    "wrangler"
+  ]
+}

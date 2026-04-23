@@ -1,5 +1,52 @@
 // JSON Web Key types (RFC 7517)
 
+import type { Base64url } from '../encoding';
+
+/**
+ * EC curves (RFC 7518 §6.2.1.1).
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1}
+ */
+export const ecCurves = [
+  'P-256',
+  'P-384',
+  'P-521',
+] as const;
+
+/**
+ * {@link ecCurves} union.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1}
+ */
+export type ECCurve = (typeof ecCurves)[number];
+
+/** Runtime set of valid EC curves. */
+export const ECCurves: ReadonlySet<ECCurve> =
+  new Set(ecCurves);
+
+/**
+ * OKP curves (RFC 8037 §2).
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8037#section-2}
+ */
+export const okpCurves = [
+  'Ed25519',
+  'Ed448',
+  'X25519',
+  'X448',
+] as const;
+
+/**
+ * {@link okpCurves} union.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8037#section-2}
+ */
+export type OKPCurve = (typeof okpCurves)[number];
+
+/** Runtime set of valid OKP curves. */
+export const OKPCurves: ReadonlySet<OKPCurve> =
+  new Set(okpCurves);
+
 /**
  * Optional JWK members shared by all key types (RFC 7517 §4).
  *
@@ -32,9 +79,9 @@ export type JWKBase = {
 export type ECJWK = JWKBase & {
   kty: 'EC'
 
-  crv: string
-  x: string
-  y: string
+  crv: ECCurve
+  x: Base64url
+  y: Base64url
 };
 
 /**
@@ -45,8 +92,8 @@ export type ECJWK = JWKBase & {
 export type OKPJWK = JWKBase & {
   kty: 'OKP'
 
-  crv: string
-  x: string
+  crv: OKPCurve
+  x: Base64url
 };
 
 /**
@@ -57,8 +104,8 @@ export type OKPJWK = JWKBase & {
 export type RSAJWK = JWKBase & {
   kty: 'RSA'
 
-  e: string
-  n: string
+  e: Base64url
+  n: Base64url
 };
 
 /**
