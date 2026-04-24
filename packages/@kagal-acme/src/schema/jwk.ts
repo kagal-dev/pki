@@ -11,13 +11,9 @@ const jwkBase = {
   'kid': v.optional(v.string()),
   'alg': v.optional(v.string()),
   'use': v.optional(v.string()),
-  'key_ops': v.optional(v.pipe(
-    v.array(v.string()), v.readonly(),
-  )),
+  'key_ops': v.optional(v.array(v.string())),
   'x5u': v.optional(v.string()),
-  'x5c': v.optional(v.pipe(
-    v.array(v.string()), v.readonly(),
-  )),
+  'x5c': v.optional(v.array(v.string())),
   'x5t': v.optional(v.string()),
   'x5t#S256': v.optional(v.string()),
 };

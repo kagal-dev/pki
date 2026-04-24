@@ -38,6 +38,12 @@ in this file.
   change.
 - **package**: Removed redundant `main` / `module`
   fields (covered by the `exports` map).
+- **types/schema**: `JWK.key_ops` and `JWK.x5c` typed
+  as `string[]` (was `readonly string[]`); the
+  matching `JWKSchema` members drop `v.readonly()`.
+  RFC 7517 §4.3 does not mandate language-level
+  immutability — this aligns with `jose.JWK` for
+  direct interop in `/utils`.
 
 ## [0.1.0] - 2026-04-13
 
