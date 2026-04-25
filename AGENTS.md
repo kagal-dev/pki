@@ -68,29 +68,15 @@ pki/
 └── package.json               # Root (private)
 ```
 
-### `@kagal/acme` Sub-path Exports
-
-| Export | Purpose | Runtime deps |
-|--------|---------|--------------|
-| `@kagal/acme/types` | Types, const tuples, ReadonlySet, `narrow()` | none |
-| `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK export / parse, `mustMembers` | WebCrypto, jose, /schema |
-| `@kagal/acme/client` | Stub — no surface yet | none |
-| `@kagal/acme/server` | Stub — no surface yet | none |
-
-Planned:
-
-| Export | Purpose | Runtime deps |
-|--------|---------|--------------|
-| `@kagal/acme/utils` | + CSR parsing, cert inspection, ARI cert ID, PEM helpers | + @peculiar/x509, pkijs |
-| `@kagal/acme/client` | + Client state machines | /schema, /utils |
-| `@kagal/acme/server` | + Server state machines | /schema, /utils |
+### `@kagal/acme`
 
 The root export (`@kagal/acme`) re-exports types +
 client + server. It does NOT re-export schema or utils.
 
-See `packages/@kagal-acme/AGENTS.md` for type-level
-patterns and conventions.
+See [`packages/@kagal-acme/README.md`](packages/@kagal-acme/README.md)
+for sub-path exports and usage, and
+[`packages/@kagal-acme/AGENTS.md`](packages/@kagal-acme/AGENTS.md)
+for type-level patterns and conventions.
 
 ### `@kagal/ca` Architecture
 
