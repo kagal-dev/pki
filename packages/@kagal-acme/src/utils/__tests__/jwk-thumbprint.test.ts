@@ -50,6 +50,7 @@ const rsaKey: RSAJWK = {
     'I4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIq' +
     'bw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw',
   ),
+  // cspell:disable-next-line
   e: asBase64url('AQAB'),
 };
 
@@ -96,6 +97,7 @@ describe('jwkThumbprint', () => {
       alg: 'ES256',
       use: 'sig',
       key_ops: ['sign'],
+      // cspell:disable-next-line
       x5c: ['MIIB...'],
     });
     expect(bare).toBe(decorated);

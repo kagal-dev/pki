@@ -131,7 +131,7 @@ describe('resolveDocuments', () => {
       makeContext([
         {
           input: path.join(
-            __dirname, 'fixtures/nonexistent.ts',
+            __dirname, 'fixtures/non-existent.ts',
           ),
           name: 'missing',
         },

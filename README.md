@@ -60,13 +60,13 @@ per CA with SQLite storage. Standard ACME clients
 `@kagal/ca` is a minimal orchestrator — all ACME
 protocol logic lives in `@kagal/acme/server`. The CA
 handles HTTP parsing, SQLite persistence, deps wiring
-(account/EAB key lookup, CA signing, enrollment-based
+(account/EAB key lookup, CA signing, enrolment-based
 policy), and DO alarm scheduling.
 
 Beyond the ACME surface:
 
 - **Management plane (RPC)** — EAB provisioning,
-  identity enrollment, direct issuance, revocation,
+  identity enrolment, direct issuance, revocation,
   certificate queries
 - **PKI endpoints** — CA chain, CRL, Certificate
   Transparency log (RFC 6962) with SCT embedding

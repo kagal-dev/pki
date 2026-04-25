@@ -36,6 +36,7 @@ describe('validateKeyChange', () => {
           'zu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhA' +
           'I4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIq' +
           'bw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw',
+        // cspell:disable-next-line
         e: 'AQAB',
       },
     });

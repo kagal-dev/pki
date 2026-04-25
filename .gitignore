@@ -4,4 +4,5 @@ node_modules
 coverage
 .tmp
 .wrangler
+# cspell:disable-next-line
 .dev.vars

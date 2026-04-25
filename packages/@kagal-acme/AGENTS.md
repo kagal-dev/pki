@@ -349,6 +349,7 @@ conformance file
 `Base64url`; if a producer ever widens back to
 `string`, the type-check fails.
 
+<!-- cspell:words destructures -->
 ### canonicalJWK literal `kty`
 
 [`canonicalJWK`][u-jwk] switches on `jwk.kty` and

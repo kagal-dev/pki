@@ -31,7 +31,7 @@ describe('validateNewOrder', () => {
   it('accepts with profile', () => {
     const result = validateNewOrder({
       ...minimalOrder,
-      profile: 'tlsServer',
+      profile: 'tls-server',
     });
     expect(result.success).toBe(true);
   });
