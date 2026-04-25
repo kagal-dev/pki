@@ -34,6 +34,7 @@ const rsa = {
     'zu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhA' +
     'I4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIq' +
     'bw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw',
+  // cspell:disable-next-line
   e: 'AQAB',
 };
 
@@ -108,6 +109,7 @@ describe('validateJWK — accept (positive)', () => {
       'key_ops': ['sign', 'verify'],
       'x5u': 'https://example.com/cert.pem',
       'x5c': ['MIIBIjANBgkqhkiG9w0BAQ=='],
+      // cspell:disable-next-line
       'x5t': 'dGh1bWJwcmludA',
       'x5t#S256': 'dGh1bWJwcmludFMyNTY',
     });

@@ -22,6 +22,7 @@ describe('parseJWK', () => {
     const out = parseJWK({
       kty: 'RSA',
       n: 'n-value',
+      // cspell:disable-next-line
       e: 'AQAB',
     });
     expect(out.kty).toBe('RSA');

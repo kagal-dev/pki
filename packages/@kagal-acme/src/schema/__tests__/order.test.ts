@@ -80,11 +80,11 @@ describe('validateOrder', () => {
   it('accepts with profile (Profiles extension)', () => {
     const result = validateOrder({
       ...minimalOrder,
-      profile: 'tlsserver',
+      profile: 'tls-server',
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.profile).toBe('tlsserver');
+      expect(result.data.profile).toBe('tls-server');
     }
   });
 

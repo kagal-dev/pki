@@ -42,6 +42,7 @@ const dnsValue = v.pipe(
   ),
 );
 
+// cspell:words hextets
 /**
  * `type: 'ip'` value schema — IPv4 dotted or IPv6
  * textual form.

@@ -1,29 +1,44 @@
 {
   "version": "0.2",
   "language": "en-GB",
+  "ignorePaths": [
+    "**/docs/rfc/**",
+    "**/pnpm-lock.yaml"
+  ],
   "ignoreRegExpList": [
-    "/['\"`][A-Za-z0-9+/_=-]{16,}['\"`]/g"
+    "/['\"`][A-Za-z0-9+/_=.-]{16,}['\"`]/g",
+    "/['\"`]eyJ[A-Za-z0-9+/_=.-]{4,}['\"`]/g"
   ],
   "words": [
+    "ALPN",
     "apptly",
+    "assignability",
     "base64url",
+    "certbot",
     "consola",
     "dnsname",
+    "ECJWK",
     "ecdsa",
     "eddsa",
     "jose",
     "kagal",
     "merkle",
+    "miniflare",
+    "OKPJWK",
     "picklist",
     "pkijs",
     "poupe",
+    "precert",
+    "precertificate",
     "prepack",
+    "resumable",
+    "RSAJWK",
     "rsassa",
-    "subpath",
-    "subpaths",
     "subproblem",
+    "subproblems",
     "thumbprint",
     "thumbprinting",
+    "TLSALPN",
     "tsdocs",
     "unbuild",
     "valibot",
@@ -31,5 +46,11 @@
     "whatwg",
     "workerd",
     "wrangler"
+  ],
+  "overrides": [
+    {
+      "filename": ["**/cspell.json", "**/package.json"],
+      "words": ["letsencrypt"]
+    }
   ]
 }
