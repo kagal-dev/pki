@@ -18,21 +18,21 @@ const uriReference =
   /^[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=%]*$/;
 
 /**
- * {@link Subproblem} schema.
+ * Shared RFC 7807 problem-detail fields.
  *
  * @remarks
- * Uses `looseObject` — unknown fields pass through.
- * `instance` is an RFC 7807 §3.1 URI-reference —
- * absolute URI or relative reference, per RFC 3986.
- * Validated structurally against the URI-reference
- * character set only; scheme / authority / path parse
- * is left to the consumer (or a `/utils` helper) when
- * it needs to dereference the value.
- *
- * @see {@link https://datatracker.ietf.org/doc/html/rfc7807#section-3.1}
- * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-6.7.1}
+ * Common ground between {@link ProblemSchema} and
+ * {@link SubproblemSchema}. `instance` is an RFC 7807
+ * §3.1 URI-reference — absolute URI or relative
+ * reference, per RFC 3986. Validated structurally
+ * against the URI-reference character set only; scheme
+ * / authority / path parse is left to the consumer (or
+ * a `/utils` helper) when it needs to dereference the
+ * value. `type` is validated as a plain string, not
+ * against {@link ErrorTypes}, to accept server-defined
+ * URNs beyond the ACME namespace.
  */
-export const SubproblemSchema = v.looseObject({
+const problemBase = {
   type: v.string(),
   title: v.optional(v.string()),
   detail: v.optional(v.string()),
@@ -42,6 +42,19 @@ export const SubproblemSchema = v.looseObject({
   instance: v.optional(
     v.pipe(v.string(), v.nonEmpty(), v.regex(uriReference)),
   ),
+};
+
+/**
+ * {@link Subproblem} schema.
+ *
+ * @remarks
+ * Uses `looseObject` — unknown fields pass through.
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc7807#section-3.1}
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-6.7.1}
+ */
+export const SubproblemSchema = v.looseObject({
+  ...problemBase,
   identifier: v.optional(IdentifierSchema),
 });
 
@@ -50,25 +63,17 @@ export const SubproblemSchema = v.looseObject({
  *
  * @remarks
  * Uses `looseObject` — unknown fields pass through.
- * `type` is validated as a plain string, not against
- * {@link ErrorTypes}, to accept server-defined URNs
- * beyond the ACME namespace. `instance` is an RFC
- * 7807 §3.1 URI-reference — see {@link SubproblemSchema}
- * for the shared validation.
+ * Per RFC 8555 §6.7.1 the top-level Problem MUST NOT
+ * carry `identifier`; per-identifier failures belong
+ * inside {@link SubproblemSchema} entries. `looseObject`
+ * still tolerates unknown fields, so a stray
+ * `identifier` won't be rejected at the schema layer —
+ * the type omission is the canonical guard.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7807}
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-6.7.1}
  */
 export const ProblemSchema = v.looseObject({
-  type: v.string(),
-  title: v.optional(v.string()),
-  detail: v.optional(v.string()),
-  status: v.optional(
-    v.pipe(v.number(), v.integer(), v.minValue(100), v.maxValue(599)),
-  ),
-  instance: v.optional(
-    v.pipe(v.string(), v.nonEmpty(), v.regex(uriReference)),
-  ),
-  identifier: v.optional(IdentifierSchema),
+  ...problemBase,
   subproblems: v.optional(v.array(SubproblemSchema)),
 });

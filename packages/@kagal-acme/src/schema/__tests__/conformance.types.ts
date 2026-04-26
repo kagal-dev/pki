@@ -217,6 +217,8 @@ expectTypeOf<
 expectTypeOf<Subproblem>().toExtend<
   SchemaOutput<typeof SubproblemSchema>
 >();
+// RFC 8555 §6.7.1: subproblems MAY carry `identifier`.
+expectTypeOf<Subproblem>().toHaveProperty('identifier');
 
 // Problem
 expectTypeOf<
@@ -225,6 +227,11 @@ expectTypeOf<
 expectTypeOf<Problem>().toExtend<
   SchemaOutput<typeof ProblemSchema>
 >();
+// RFC 8555 §6.7.1: identifier MUST NOT appear at top level of
+// an ACME problem document. Locked in at the type layer; the
+// schema's `looseObject` cannot enforce this at runtime
+// without breaking RFC 7807 §3.2 extension passthrough.
+expectTypeOf<Problem>().not.toHaveProperty('identifier');
 
 // RenewalInfo
 expectTypeOf<
