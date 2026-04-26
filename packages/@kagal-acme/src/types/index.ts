@@ -46,7 +46,6 @@ export {
   type ECJWK,
   type FlattenedJWS,
   type JWK,
-  type JWKBase,
   type JWSAlgorithm,
   JWSAlgorithms,
   jwsAlgorithms,
@@ -61,10 +60,8 @@ export {
 export type {
   Account,
   Authorization,
-  AuthorizationBase,
   CertID,
   Challenge,
-  ChallengeBase,
   Directory,
   DirectoryMeta,
   DNSChallenge,
