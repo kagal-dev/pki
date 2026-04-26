@@ -55,6 +55,17 @@ in this file.
   `OKPJWK` / `RSAJWK`); consumers always know which
   concrete shape they hold.
 
+### Fixed
+
+- **types/schema**: `Problem` no longer extends
+  `Subproblem`, so the top-level `identifier` field
+  no longer appears on the `Problem` type per RFC 8555
+  §6.7.1 ("identifier MUST NOT be present at the top
+  level"). Both shapes share a private `ProblemBase`
+  carrying the RFC 7807 §3.1 fields. Conformance
+  type-tests lock the divergence: `Subproblem` MUST
+  have `identifier`, `Problem` MUST NOT.
+
 ## [0.1.0] - 2026-04-13
 
 Initial release.
