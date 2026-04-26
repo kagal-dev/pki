@@ -59,7 +59,7 @@ export const OKPCurves: ReadonlySet<OKPCurve> =
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7517#section-4}
  */
-export type JWKBase = {
+type JWKBase = {
   /** Algorithm (§4.4). */
   'alg'?: string
   /** Key operations (§4.3). */

@@ -45,6 +45,16 @@ in this file.
   immutability — this aligns with `jose.JWK` for
   direct interop in `/utils`.
 
+### Removed
+
+- **types**: `AuthorizationBase`, `ChallengeBase`, and
+  `JWKBase` are no longer exported. They served only as
+  in-file union components for the concrete sibling
+  variants (`Authorization`, `HTTPChallenge` /
+  `DNSChallenge` / `TLSALPNChallenge`, `ECJWK` /
+  `OKPJWK` / `RSAJWK`); consumers always know which
+  concrete shape they hold.
+
 ## [0.1.0] - 2026-04-13
 
 Initial release.
