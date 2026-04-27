@@ -26,7 +26,7 @@ The `/client` and `/server` sub-paths compose
 
 | Export | Purpose |
 |--------|---------|
-| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet, branded strings, `narrow()` |
+| `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories |
 | `@kagal/acme/schema` | Valibot validators conforming to `/types` |
 | `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse |
 | `@kagal/acme/client` | Stub — no surface yet |
@@ -85,7 +85,7 @@ without discrimination ([`Problem`][problem],
 [`ACMEProtectedHeader`][jws]):
 
 ```typescript
-interface Problem extends Subproblem {
+interface Problem extends ProblemBase {
   subproblems?: Subproblem[]
 }
 
@@ -108,6 +108,19 @@ export const OrderStatuses: ReadonlySet<OrderStatus> = new Set(orderStatuses);
 All constant files live in [`types/constants/`][constants].
 Utility functions (e.g. `narrow()`) live in
 [`types/utils.ts`][utils].
+
+Status-mapping tables (e.g. [`errorStatus`][error-type])
+are a sibling pattern: typed as
+`Readonly<Record<X, T>>` for compile-time exhaustiveness
+on `X`. They live in the same file as the
+tuple/type/set triple they index.
+
+Pure data factories (e.g. [`newProblem`][problem],
+[`newSubproblem`][problem]) live alongside their types
+in `types/objects/` and return plain objects suitable
+for the wire form. Status defaults derive from the
+matching status table; overrides go through an
+`options` parameter.
 
 ### Branded strings
 
@@ -400,6 +413,7 @@ re-pad step — it would be dead code.
 <!-- references -->
 [root]: ../../AGENTS.md
 [constants]: src/types/constants/
+[error-type]: src/types/constants/error-type.ts
 [utils]: src/types/utils.ts
 [encoding]: src/types/encoding.ts
 [challenge]: src/types/objects/challenge.ts

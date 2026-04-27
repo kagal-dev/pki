@@ -5,6 +5,19 @@ in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **types**: `errorStatus` URN → HTTP-status table
+  (`Readonly<Record<ErrorType, number>>`) following
+  Boulder defaults, with RFC 9773 §7.4 locking
+  `alreadyReplaced` to 409.
+- **types**: `newProblem` and `newSubproblem` data
+  factories returning plain objects for the
+  `application/problem+json` wire form (RFC 7807,
+  RFC 8555 §6.7.1). `status` is always emitted,
+  derived from `errorStatus[urn]` unless overridden
+  via `options.status`.
+
 ## [0.1.1] - 2026-05-07
 
 ### Added

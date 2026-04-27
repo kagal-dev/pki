@@ -6,6 +6,7 @@ export {
   ChallengeTypes,
 } from './challenge-type';
 export {
+  errorStatus,
   type ErrorType,
   errorTypes,
   ErrorTypes,
