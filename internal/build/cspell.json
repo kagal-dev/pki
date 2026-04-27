@@ -20,6 +20,7 @@
     "ECJWK",
     "ecdsa",
     "eddsa",
+    "hermeticity",
     "jose",
     "kagal",
     "merkle",

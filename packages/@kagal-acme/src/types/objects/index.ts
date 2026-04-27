@@ -25,9 +25,12 @@ export type {
 export type {
   Order,
 } from './order';
-export type {
-  Problem,
-  Subproblem,
+export {
+  newProblem,
+  type NewProblemOptions,
+  newSubproblem,
+  type Problem,
+  type Subproblem,
 } from './problem';
 export type {
   CertID,

@@ -14,8 +14,10 @@ import { expectTypeOf } from 'vitest';
 
 import type {
   asBase64url,
+  asBase64urlAlphabet,
   asPEM,
   Base64url,
+  Base64urlAlphabet,
   PEM,
 } from '../encoding';
 
@@ -40,26 +42,38 @@ import type {
 // A branded string is still a string: reads, concat,
 // JSON.stringify, storage writes all work transparently.
 expectTypeOf<Base64url>().toExtend<string>();
+expectTypeOf<Base64urlAlphabet>().toExtend<string>();
 expectTypeOf<PEM>().toExtend<string>();
 
 // A plain string is NOT a branded value: writes require
 // the brand, preventing silent mix-ups at call sites.
 expectTypeOf<string>().not.toExtend<Base64url>();
+expectTypeOf<string>().not.toExtend<Base64urlAlphabet>();
 expectTypeOf<string>().not.toExtend<PEM>();
 
 // -- brand disjointness --
 
-// Base64url and PEM do not widen into each other. A
-// `getChain()` result cannot be passed where a JWS
-// signature is expected, and vice versa.
+// The three brands are pairwise disjoint. `Base64url`
+// (byte-framed, decodable) and `Base64urlAlphabet`
+// (alphabet-only, no decode framing) are intentionally
+// non-interchangeable — a `Challenge.token` cannot be
+// passed where a JWS signature is expected, and vice
+// versa. PEM is text armour and disjoint from both.
+expectTypeOf<Base64url>().not.toExtend<Base64urlAlphabet>();
 expectTypeOf<Base64url>().not.toExtend<PEM>();
+expectTypeOf<Base64urlAlphabet>().not.toExtend<Base64url>();
+expectTypeOf<Base64urlAlphabet>().not.toExtend<PEM>();
 expectTypeOf<PEM>().not.toExtend<Base64url>();
+expectTypeOf<PEM>().not.toExtend<Base64urlAlphabet>();
 
 // -- accessor signatures --
 
 expectTypeOf<
   ReturnType<typeof asBase64url>
 >().toEqualTypeOf<Base64url>();
+expectTypeOf<
+  ReturnType<typeof asBase64urlAlphabet>
+>().toEqualTypeOf<Base64urlAlphabet>();
 expectTypeOf<
   ReturnType<typeof asPEM>
 >().toEqualTypeOf<PEM>();
@@ -70,6 +84,9 @@ expectTypeOf<
 // lie (it would claim any value is a Base64url).
 expectTypeOf<
   Parameters<typeof asBase64url>[0]
+>().toEqualTypeOf<string>();
+expectTypeOf<
+  Parameters<typeof asBase64urlAlphabet>[0]
 >().toEqualTypeOf<string>();
 expectTypeOf<
   Parameters<typeof asPEM>[0]

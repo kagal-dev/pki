@@ -10,11 +10,20 @@ utilities.
 
 | Export | Description | Dependencies |
 |--------|-------------|--------------|
-| `@kagal/acme/types` | Interfaces, const tuples, ReadonlySet constants, branded `Base64url` / `Base64urlAlphabet` / `PEM` | none |
+| `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories — see [`/types` exports][types-exports] | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
 | `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse | WebCrypto, jose, /schema |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
+
+#### `/types` exports
+
+- Interfaces and const tuples (e.g. `Account`, `Order`, `Identifier`)
+- `ReadonlySet` constants for runtime narrowing (e.g. `AccountStatuses`, `OrderStatuses`)
+- Branded `Base64url` / `Base64urlAlphabet` / `PEM`
+- `errorStatus` — URN→HTTP-status table
+- `newProblem` / `newSubproblem` — pure data factories for [RFC 7807][rfc7807]
+  problem documents
 
 ### Planned
 
@@ -105,6 +114,39 @@ use `looseObject` (headers allow additional
 parameters) with `ACMERequestHeaderSchema` enforcing
 the `jwk` XOR `kid` constraint.
 
+### Problem documents
+
+```typescript
+import { newProblem, newSubproblem } from '@kagal/acme/types';
+
+// HTTP status defaults from the URN→HTTP table.
+const problem = newProblem(
+  'urn:ietf:params:acme:error:rejectedIdentifier',
+  'Identifier outside allowed set',
+);
+
+// Per-identifier sub-errors (RFC 8555 §6.7.1).
+const compound = newProblem(
+  'urn:ietf:params:acme:error:compound',
+  'Pre-issuance checks failed',
+  {
+    subproblems: [
+      newSubproblem(
+        'urn:ietf:params:acme:error:caa',
+        { type: 'dns', value: 'forbidden.example' },
+        'CAA forbids issuance',
+      ),
+    ],
+  },
+);
+```
+
+`newProblem` derives the HTTP status from
+`errorStatus[urn]` unless `options.status` overrides it
+(Boulder reuses some URNs with non-default statuses).
+Any top-level URN may carry `subproblems` per RFC 8555
+§6.7.1; `compound` is the canonical aggregator.
+
 ### Encoding
 
 ```typescript
@@ -126,4 +168,9 @@ const thumbprint = await jwkThumbprint(accountJWK);
 
 ## Licence
 
-[MIT](../../LICENCE.txt)
+[MIT][mit]
+
+<!-- references -->
+[mit]: ../../LICENCE.txt
+[rfc7807]: https://datatracker.ietf.org/doc/html/rfc7807
+[types-exports]: #types-exports
