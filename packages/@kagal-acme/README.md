@@ -13,6 +13,7 @@ utilities.
 | `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories — see [`/types` exports][types-exports] | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
 | `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse | WebCrypto, jose, /schema |
+| `@kagal/acme/error` | `ProblemError` / `SubproblemError` throwable Error wrappers around `/types`'s `newProblem` / `newSubproblem`, with URN-aware shortcuts (`malformed` / `unauthorized` / `serverInternal` / `compound`; `rejectedIdentifier` / `caa`) | /types |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
 
@@ -44,12 +45,11 @@ the lightest layer you need:
 
 ```text
 types          zero deps, type-only contracts
-  \
-  schema       + valibot — structural validation
-    \
-    utils      + WebCrypto — decode, validate, verify
-    / \
-client  server   protocol state machines
+  ├── error    + ProblemError carrier
+  └── schema   + valibot — structural validation
+        └── utils      + WebCrypto — decode, validate, verify
+              ├── client     protocol state machines
+              └── server     protocol state machines
 ```
 
 `/schema` validators return the hand-written types
@@ -165,6 +165,78 @@ const nonce = getRandom(16);
 // RFC 7638 SHA-256 JWK thumbprint — 43 chars.
 const thumbprint = await jwkThumbprint(accountJWK);
 ```
+
+### Errors
+
+The `/types` sub-path exports plain data factories
+(`newProblem`, `newSubproblem`) that build RFC 7807
+documents with the URN→status table applied. The
+`/error` sub-path wraps those documents in throwable
+`ProblemError` / `SubproblemError` classes for
+fail-fast control flow. Pick the layer that matches
+the call site's contract:
+
+- A deps callback whose contract is "return a
+  `Problem` to reject, `undefined` to approve" (e.g.
+  the planned `@kagal/acme/server`'s `checkPolicy`)
+  uses `newProblem` directly — no `Error` involved.
+- A protocol step that wants to bail out with a
+  `Problem` and let an outer catcher serialise it
+  uses `ProblemError`.
+
+```typescript
+import { newProblem } from '@kagal/acme/types';
+import { ProblemError, SubproblemError } from '@kagal/acme/error';
+
+// Data-only path — return from a checkPolicy callback.
+function checkPolicy(identifier) {
+  if (forbidden(identifier)) {
+    return newProblem(
+      'urn:ietf:params:acme:error:rejectedIdentifier',
+      'Identifier outside allowed set',
+    );
+  }
+  return undefined;
+}
+
+// URN-aware factory derives status from RFC 8555 §6.7.
+throw ProblemError.malformed(
+  'Flattened JWS failed schema validation',
+  { cause },
+);
+
+// Per-identifier validators throw `SubproblemError`s;
+// the caller aggregates and rolls them into a compound.
+const failures: SubproblemError[] = [];
+for (const id of identifiers) {
+  if (!await checkCAA(id)) {
+    failures.push(SubproblemError.caa(id, 'CAA forbids issuance'));
+  }
+}
+if (failures.length > 0) {
+  throw ProblemError.compound(failures, 'Pre-issuance checks failed');
+}
+
+// Catch and surface on the wire.
+try {
+  // ...
+} catch (err) {
+  if (err instanceof ProblemError) {
+    return new Response(JSON.stringify(err.problem), {
+      status: err.problem.status ?? 500,
+      headers: { 'content-type': 'application/problem+json' },
+    });
+  }
+  throw err;
+}
+```
+
+`SubproblemError` is always aggregated through
+`ProblemError.compound` before reaching the HTTP
+boundary — RFC 8555 §6.7.1 forbids `identifier` at
+the top level of a problem document, so a stray
+`SubproblemError` serialised directly would violate
+the spec.
 
 ## Licence
 

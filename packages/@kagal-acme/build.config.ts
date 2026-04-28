@@ -5,6 +5,7 @@ export default defineBuildConfig({
   entries: [
     { input: 'src/index', name: 'index' },
     { input: 'src/types/index', name: 'types' },
+    { input: 'src/error/index', name: 'error' },
     { input: 'src/schema/index', name: 'schema' },
     { input: 'src/utils/index', name: 'utils' },
     { input: 'src/client/index', name: 'client' },

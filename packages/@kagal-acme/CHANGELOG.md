@@ -7,6 +7,22 @@ in this file.
 
 ### Added
 
+- **error**: New `/error` sub-path with `ProblemError`
+  and `SubproblemError` Error subclasses wrapping the
+  Problem document factories from `/types`. Both layers
+  produce the same RFC 7807 wire document — wrappers
+  delegate to the factories — so callers mix
+  return-a-Problem and throw-a-Problem patterns per
+  call-site contract. Static helpers: `.of`,
+  `.malformed`, `.unauthorized`, `.serverInternal`,
+  `.compound` on `ProblemError`; `.of`,
+  `.rejectedIdentifier`, `.caa` on `SubproblemError`,
+  with HTTP status derived from `errorStatus[urn]`
+  unless overridden via `options.status`.
+  `ProblemError.compound` accepts mixed `Subproblem`
+  documents and `SubproblemError` instances, unwrapping
+  the latter and deep-copying the array so post-throw
+  mutation cannot leak into the wire form.
 - **types**: `errorStatus` URN → HTTP-status table
   (`Readonly<Record<ErrorType, number>>`) following
   Boulder defaults, with RFC 9773 §7.4 locking
