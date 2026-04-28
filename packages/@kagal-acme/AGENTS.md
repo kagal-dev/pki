@@ -17,6 +17,19 @@ JWK export; and `/schema` for JWK parse-and-brand
 (`parseJWK`, `exportJWK`). It will extend with
 `@peculiar/x509` + `pkijs` for CSR, cert, and ARI
 helpers.
+The `/types` sub-path also exposes pure data factories
+(`newProblem`, `newSubproblem`) for building RFC 7807
+documents with the URN→status table applied — used by
+deps callbacks whose contract returns a `Problem` rather
+than throwing.
+The `/error` sub-path layers throwable Error wrappers
+on top: `ProblemError` and `SubproblemError` delegate
+to `newProblem` / `newSubproblem` for document
+construction, then wrap the result in an `Error` for
+fail-fast control flow. `ProblemError.compound`
+aggregates `SubproblemError` instances or plain
+`Subproblem` documents into a `compound` Problem.
+Depends only on `/types`.
 The `/client` and `/server` sub-paths compose
 `/schema` and `/utils`.
 
@@ -29,6 +42,7 @@ The `/client` and `/server` sub-paths compose
 | `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories |
 | `@kagal/acme/schema` | Valibot validators conforming to `/types` |
 | `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse |
+| `@kagal/acme/error` | `ProblemError` / `SubproblemError` throwable Error wrappers around `/types`'s `newProblem` / `newSubproblem`, with URN-aware shortcuts (`malformed` / `unauthorized` / `serverInternal` / `compound`; `rejectedIdentifier` / `caa`) |
 | `@kagal/acme/client` | Stub — no surface yet |
 | `@kagal/acme/server` | Stub — no surface yet |
 
@@ -81,19 +95,24 @@ to stay linked to the constant tuple.
 ### interface extends
 
 Use when one interface is a strict superset of another
-without discrimination ([`Problem`][problem],
-[`ACMEProtectedHeader`][jws]):
+without discrimination ([`ACMEProtectedHeader`][jws]):
 
 ```typescript
-interface Problem extends ProblemBase {
-  subproblems?: Subproblem[]
-}
-
 interface ACMEProtectedHeader extends JWSProtectedHeader {
   nonce: string
   url: string
 }
 ```
+
+Sibling shapes that share fields but neither is a
+superset use a file-private `*Base` and both
+`extend` it. [`Problem`][problem] and
+[`Subproblem`][problem] follow this pattern: RFC
+8555 §6.7.1 forbids `identifier` at the top level,
+so `Problem extends Subproblem` would
+structurally accept what the spec forbids.
+Both extend `ProblemBase` instead — `Subproblem`
+adds `identifier?`, `Problem` adds `subproblems?`.
 
 ### Constants (tuple → type → set)
 
@@ -410,6 +429,119 @@ decoder accepts missing `=` padding, and every
 browser / worker runtime conforms. Don't add a
 re-pad step — it would be dead code.
 
+## Errors Sub-path Patterns
+
+### Data factories vs Error wrappers
+
+Two layers ship side by side:
+
+- **`/types` data factories** ([`newProblem`,
+  `newSubproblem`][problem]) build plain RFC 7807
+  documents — pure data, no `Error` instance, no
+  `cause`, no stack trace. Use these when the call
+  site's contract is to **return** a `Problem` rather
+  than throw — for example `@kagal/acme/server`'s
+  planned `checkPolicy: () => Problem | undefined`,
+  or any `/types`-only consumer that doesn't want to
+  pull in the Error wrappers.
+- **`/error` throwable wrappers**
+  ([`ProblemError`, `SubproblemError`][problem-error])
+  delegate to the data factories for document
+  construction and wrap the result in an `Error`
+  subclass for fail-fast control flow. Use these
+  inside protocol logic where you want a `throw` to
+  short-circuit a validation chain and an outer
+  `catch (err instanceof ProblemError)` boundary to
+  surface the document on the wire.
+
+The wrappers preserve full referential equality with
+the data factories — `ProblemError.malformed(d).problem`
+is identical in shape to `newProblem('…malformed', d)`
+— so callers can switch layers without changing the
+wire output.
+
+### Factories vs constructor
+
+Reach for a named factory ([`malformed`, `unauthorized`,
+`serverInternal`, `compound`][problem-error]) to derive
+the conventional HTTP status from
+[`errorStatus`][error-type]. Use the generic
+`of(type, detail?, options?)` for URNs without a named
+factory (`badNonce`, `caa`, `rateLimited`, …). Reach
+for the constructor only when shaping a Problem the
+factories don't cover — custom `title`, RFC 7807
+extension fields, or a pre-built document round-tripped
+from the wire.
+
+### Status overrides
+
+`options.status` overrides the conventional value from
+[`errorStatus`][error-type] while keeping the URN
+classification. Boulder reuses `malformed` with
+non-default statuses (404 no-such-resource, 405
+method-not-allowed):
+
+```typescript
+ProblemError.malformed('No such order', { status: 404 });
+```
+
+Omit `status` to fall back to the table.
+
+### Per-identifier failures
+
+[`SubproblemError`][problem-error] is the per-identifier
+sibling of `ProblemError`: it wraps a [`Subproblem`][problem]
+(RFC 8555 §6.7.1) instead of a Problem and carries the
+optional `identifier` field that the top-level Problem is
+forbidden from carrying. Each per-identifier validator
+throws a `SubproblemError`; the caller aggregates the
+results — typically via `Promise.allSettled` — and rolls
+them into a `compound` Problem:
+
+```typescript
+const failures: SubproblemError[] = [];
+for (const id of identifiers) {
+  if (!await checkCAA(id)) {
+    failures.push(SubproblemError.caa(id, 'CAA forbids issuance'));
+  }
+}
+if (failures.length > 0) {
+  throw ProblemError.compound(failures, 'Pre-issuance checks failed');
+}
+```
+
+Use the named shortcuts (`rejectedIdentifier`, `caa`) for
+the URNs an ACME server emits per identifier most often;
+fall back to `SubproblemError.of(type, identifier?, detail?, options?)`
+for the rest. `ProblemError.compound` accepts any mix of
+plain `Subproblem` documents and `SubproblemError`
+instances, unwrapping the latter before serialisation —
+`Error.cause` on individual `SubproblemError` instances
+is dropped, since `cause` lives on the `Error` wrapper
+(not on the `Subproblem` document) and is not part of the
+wire form.
+
+**Wire-boundary contract.** A `SubproblemError` whose
+`subproblem` was serialised directly as
+`application/problem+json` would put `identifier` at the
+top level of the document — RFC 8555 §6.7.1 forbids
+exactly that. The HTTP boundary catches `ProblemError`
+only; `SubproblemError` always funnels through
+`ProblemError.compound` first.
+
+### Wire form
+
+`error.problem` is the document that lands in the
+`application/problem+json` body — serialise the carried
+document directly (`JSON.stringify(err.problem)`), not
+the `Error` itself. `compound()` deep-copies the caller's
+`subproblems` via `structuredClone`, so post-throw
+mutation of either the source array or any contained
+Subproblem does not leak into the wire form. The
+constructor takes a Problem document by reference —
+advanced callers using `new ProblemError(doc)` own the
+hermeticity of the document they pass.
+
 <!-- references -->
 [root]: ../../AGENTS.md
 [constants]: src/types/constants/
@@ -419,6 +551,7 @@ re-pad step — it would be dead code.
 [challenge]: src/types/objects/challenge.ts
 [authorization]: src/types/objects/authorization.ts
 [problem]: src/types/objects/problem.ts
+[problem-error]: src/error/problem.ts
 [jws]: src/types/jws/jws.ts
 [schema]: src/schema/
 [s-index]: src/schema/index.ts

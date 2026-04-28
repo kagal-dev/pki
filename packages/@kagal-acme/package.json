@@ -37,6 +37,10 @@
       "types": "./dist/client.d.mts",
       "default": "./dist/client.mjs"
     },
+    "./error": {
+      "types": "./dist/error.d.mts",
+      "default": "./dist/error.mjs"
+    },
     "./schema": {
       "types": "./dist/schema.d.mts",
       "default": "./dist/schema.mjs"
