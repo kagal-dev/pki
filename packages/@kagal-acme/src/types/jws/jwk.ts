@@ -54,8 +54,9 @@ export const OKPCurves: ReadonlySet<OKPCurve> =
  * Array-valued members (`key_ops`, `x5c`) are typed as
  * mutable `string[]` for interop with
  * {@link https://github.com/panva/jose | jose}'s `JWK`
- * (consumed by `exportJWK` in `/utils`). RFC 7517 does
- * not mandate language-level immutability.
+ * (consumed by `exportJWK` and `flattenedVerify` in
+ * `/utils`). RFC 7517 does not mandate language-level
+ * immutability.
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7517#section-4}
  */

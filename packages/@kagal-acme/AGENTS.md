@@ -13,10 +13,14 @@ The `/schema` sub-path depends only on Valibot.
 The `/utils` sub-path uses WebCrypto and
 `btoa`/`atob` for base64url codec, random bytes,
 and RFC 7638 JWK thumbprint; `jose` for WebCrypto
-JWK export; and `/schema` for JWK parse-and-brand
-(`parseJWK`, `exportJWK`). It will extend with
-`@peculiar/x509` + `pkijs` for CSR, cert, and ARI
-helpers.
+JWK export and ACME JWS verification;
+`/schema` for structural validation in `parseJWK`,
+`exportJWK`, and `parseJWS`; and `/error` so
+`parseJWS` can throw `ProblemError` with the RFC
+8555 §6.7 URN already resolved (`malformed`,
+`badSignatureAlgorithm`, `unauthorized`). It will
+extend with `@peculiar/x509` + `pkijs` for CSR,
+cert, and ARI helpers.
 The `/types` sub-path also exposes pure data factories
 (`newProblem`, `newSubproblem`) for building RFC 7807
 documents with the URN→status table applied — used by
@@ -41,7 +45,7 @@ The `/client` and `/server` sub-paths compose
 |--------|---------|
 | `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories |
 | `@kagal/acme/schema` | Valibot validators conforming to `/types` |
-| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse |
+| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse, ACME JWS parse + verify, `mustMembers` |
 | `@kagal/acme/error` | `ProblemError` / `SubproblemError` throwable Error wrappers around `/types`'s `newProblem` / `newSubproblem`, with URN-aware shortcuts (`malformed` / `unauthorized` / `serverInternal` / `compound`; `rejectedIdentifier` / `caa`) |
 | `@kagal/acme/client` | Stub — no surface yet |
 | `@kagal/acme/server` | Stub — no surface yet |

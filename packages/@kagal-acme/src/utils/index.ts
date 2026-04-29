@@ -11,3 +11,9 @@ export {
 } from './encoding';
 
 export { exportJWK, jwkThumbprint, parseJWK } from './jwk';
+
+export {
+  type ParsedJWS,
+  parseJWS,
+  type ResolveKey,
+} from './jws';

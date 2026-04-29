@@ -42,6 +42,19 @@ in this file.
   RFC 8555 §6.7.1). `status` is always emitted,
   derived from `errorStatus[urn]` unless overridden
   via `options.status`.
+- **utils**: `parseJWS` — canonical decode +
+  structural-validate + crypto-verify entry point for
+  ACME outer-JWS requests (RFC 7515 §7.2.2 + RFC 8555
+  §6). Three positional arguments (raw body, expected
+  URL, `ResolveKey` callback). Returns a `ParsedJWS`
+  with the verified protected header, decoded payload
+  (or `undefined` for POST-as-GET per §6.3), and the
+  validated JWS for audit / replay storage. Failures
+  throw `ProblemError` with the §6.7 URN already
+  resolved (`malformed`, `badSignatureAlgorithm`,
+  `unauthorized`); errors thrown by the resolver pass
+  through unchanged so callers keep control of their
+  own URNs.
 
 ## [0.1.1] - 2026-05-07
 
