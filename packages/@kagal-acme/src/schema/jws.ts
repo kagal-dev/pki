@@ -14,6 +14,28 @@ import {
 import { JWKSchema } from './jwk';
 
 /**
+ * {@link ACMESignAlgorithm} schema (RFC 8555 §6.2).
+ *
+ * @remarks
+ * Picklist of ACME outer-JWS signature algorithms —
+ * the asymmetric subset of {@link jwsAlgorithms}. RFC
+ * 8555 §6.2 forbids MAC-based algorithms (`HS*`) on
+ * the outer JWS; those appear only in EAB inner JWS
+ * (§7.3.4), validated separately via
+ * {@link JWSProtectedHeaderSchema}. Composed by
+ * {@link ACMEProtectedHeaderSchema} and
+ * {@link ACMERequestHeaderSchema}; exposed
+ * standalone so callers can route a structurally
+ * unsupported `alg` to RFC 8555 §6.7
+ * `badSignatureAlgorithm` before the full header
+ * schema runs (e.g. inside `parseJWS`).
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc8555#section-6.2}
+ */
+export const ACMESignAlgorithmSchema =
+  v.picklist(acmeSignAlgorithms);
+
+/**
  * {@link FlattenedJWS} schema (RFC 7515 §7.2.2).
  *
  * @remarks
@@ -56,7 +78,7 @@ export const JWSProtectedHeaderSchema = v.looseObject({
 
 /** Shared ACME outer-JWS protected header fields. */
 const acmeProtectedHeaderBase = {
-  alg: v.picklist(acmeSignAlgorithms),
+  alg: ACMESignAlgorithmSchema,
   jwk: v.optional(JWKSchema),
   kid: v.optional(v.pipe(v.string(), v.url())),
   nonce: Base64urlSchema,
@@ -83,7 +105,7 @@ export const ACMEProtectedHeaderSchema = v.looseObject({
 
 /** Shared ACME request header fields. */
 const acmeRequestHeaderBase = {
-  alg: v.picklist(acmeSignAlgorithms),
+  alg: ACMESignAlgorithmSchema,
   nonce: Base64urlSchema,
   url: v.pipe(v.string(), v.url()),
 };

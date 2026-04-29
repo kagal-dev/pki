@@ -5,6 +5,7 @@ import { expectTypeOf } from 'vitest';
 
 import type { SchemaOutput } from './test-utils';
 
+import type { ACMESignAlgorithm } from '../../types/jws/alg';
 import type { JWK } from '../../types/jws/jwk';
 import type {
   ACMEProtectedHeader,
@@ -58,6 +59,7 @@ import type {
   AccountSchema,
   ACMEProtectedHeaderSchema,
   ACMERequestHeaderSchema,
+  ACMESignAlgorithmSchema,
   AuthorizationSchema,
   CertIDSchema,
   ChallengeSchema,
@@ -114,6 +116,14 @@ expectTypeOf<
 >().toExtend<ACMERequestHeader>();
 expectTypeOf<ACMERequestHeader>().toExtend<
   SchemaOutput<typeof ACMERequestHeaderSchema>
+>();
+
+// ACMESignAlgorithm
+expectTypeOf<
+  SchemaOutput<typeof ACMESignAlgorithmSchema>
+>().toExtend<ACMESignAlgorithm>();
+expectTypeOf<ACMESignAlgorithm>().toExtend<
+  SchemaOutput<typeof ACMESignAlgorithmSchema>
 >();
 
 // CertID

@@ -5,6 +5,7 @@
 import * as v from 'valibot';
 
 import type { Base64url, PEM } from '../types/encoding';
+import type { ACMESignAlgorithm } from '../types/jws/alg';
 import type { JWK } from '../types/jws/jwk';
 import type {
   ACMEProtectedHeader,
@@ -70,6 +71,7 @@ import { JWKSchema } from './jwk';
 import {
   ACMEProtectedHeaderSchema,
   ACMERequestHeaderSchema,
+  ACMESignAlgorithmSchema,
   FlattenedJWSSchema,
   JWSProtectedHeaderSchema,
 } from './jws';
@@ -115,6 +117,7 @@ export { JWKSchema } from './jwk';
 export {
   ACMEProtectedHeaderSchema,
   ACMERequestHeaderSchema,
+  ACMESignAlgorithmSchema,
   FlattenedJWSSchema,
   JWSProtectedHeaderSchema,
 } from './jws';
@@ -387,6 +390,31 @@ export function validateACMERequestHeader(
 ): ValidationResult<ACMERequestHeader> {
   return safeValidate(
     ACMERequestHeaderSchema, input,
+  );
+}
+
+/**
+ * Validate an {@link ACMESignAlgorithm} string.
+ *
+ * @param input - raw value (typically the `alg` field
+ *   plucked from a decoded JWS protected header)
+ * @returns {@link ValidationResult} with
+ *   {@link ACMESignAlgorithm} on success
+ *
+ * @remarks
+ * Standalone counterpart to the picklist composed by
+ * {@link ACMEProtectedHeaderSchema} and
+ * {@link ACMERequestHeaderSchema}. Use it to surface
+ * an unsupported `alg` as RFC 8555 §6.7
+ * `badSignatureAlgorithm` before the full header
+ * schema runs and folds it into a generic
+ * `malformed`.
+ */
+export function validateACMESignAlgorithm(
+  input: unknown,
+): ValidationResult<ACMESignAlgorithm> {
+  return safeValidate(
+    ACMESignAlgorithmSchema, input,
   );
 }
 
