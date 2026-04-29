@@ -12,7 +12,7 @@ utilities.
 |--------|-------------|--------------|
 | `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories — see [`/types` exports][types-exports] | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse | WebCrypto, jose, /schema |
+| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse, ACME JWS parse + verify, `mustMembers` | WebCrypto, jose, /schema, /error |
 | `@kagal/acme/error` | `ProblemError` / `SubproblemError` throwable Error wrappers around `/types`'s `newProblem` / `newSubproblem`, with URN-aware shortcuts (`malformed` / `unauthorized` / `serverInternal` / `compound`; `rejectedIdentifier` / `caa`) | /types |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
@@ -47,16 +47,24 @@ the lightest layer you need:
 types          zero deps, type-only contracts
   ├── error    + ProblemError carrier
   └── schema   + valibot — structural validation
-        └── utils      + WebCrypto — decode, validate, verify
+        └── utils      + WebCrypto, /error
+              │         decode, validate, verify, throw
               ├── client     protocol state machines
               └── server     protocol state machines
 ```
+
+`/utils` depends on `/error` so `parseJWS` can throw
+`ProblemError` directly with the RFC 8555 §6.7 URN
+already chosen — callers
+`catch (err instanceof ProblemError)` and serialise
+`err.problem` as `application/problem+json` without
+a second URN mapping step.
 
 `/schema` validators return the hand-written types
 from `/types`, not Valibot's inferred output.
 `/utils` uses `/schema` internally for the
 decode → validate → verify pipeline (`parseJWK`,
-`exportJWK`).
+`exportJWK`, `parseJWS`).
 
 Encoding contracts cross the layer boundary as
 branded strings: `@kagal/acme/types` exports
@@ -165,6 +173,36 @@ const nonce = getRandom(16);
 // RFC 7638 SHA-256 JWK thumbprint — 43 chars.
 const thumbprint = await jwkThumbprint(accountJWK);
 ```
+
+### JWS parse and verify
+
+```typescript
+import { parseJWS, type ResolveKey } from '@kagal/acme/utils';
+
+const resolveKey: ResolveKey = async (header) =>
+  header.jwk ?? await lookupAccountKey(header.kid);
+
+const parsed = await parseJWS(body, request.url, resolveKey);
+// parsed.protectedHeader : ACMERequestHeader (jwk XOR kid)
+// parsed.payload         : unknown (undefined for POST-as-GET)
+// parsed.jws             : FlattenedJWS
+```
+
+`parseJWS` is stateless — it decodes, validates the
+ACME protected header (RFC 8555 §6.2), checks the URL
+matches, and verifies the signature via the JWK
+returned by `resolveKey`. Nonce consumption and
+account lookup are the caller's responsibility.
+
+Failures throw `ProblemError` with the RFC 8555 §6.7
+URN already chosen (`malformed` for structural and
+URL-mismatch failures, `badSignatureAlgorithm` for an
+unsupported `alg`, `unauthorized` for a signature
+that fails verification). Errors thrown from
+`resolveKey` pass through unchanged so the caller
+keeps control of `accountDoesNotExist` /
+`unauthorized` mapping. See [Errors](#errors) for the
+catch-and-serialise pattern.
 
 ### Errors
 
