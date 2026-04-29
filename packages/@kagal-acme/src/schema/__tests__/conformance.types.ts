@@ -9,6 +9,7 @@ import type {
   Account,
   ACMEProtectedHeader,
   ACMERequestHeader,
+  ACMESignAlgorithm,
   Authorization,
   CertID,
   Challenge,
@@ -36,6 +37,7 @@ import type {
   AccountSchema,
   ACMEProtectedHeaderSchema,
   ACMERequestHeaderSchema,
+  ACMESignAlgorithmSchema,
   AuthorizationSchema,
   CertIDSchema,
   ChallengeSchema,
@@ -92,6 +94,14 @@ expectTypeOf<
 >().toExtend<ACMERequestHeader>();
 expectTypeOf<ACMERequestHeader>().toExtend<
   SchemaOutput<typeof ACMERequestHeaderSchema>
+>();
+
+// ACMESignAlgorithm
+expectTypeOf<
+  SchemaOutput<typeof ACMESignAlgorithmSchema>
+>().toExtend<ACMESignAlgorithm>();
+expectTypeOf<ACMESignAlgorithm>().toExtend<
+  SchemaOutput<typeof ACMESignAlgorithmSchema>
 >();
 
 // CertID

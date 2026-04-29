@@ -23,6 +23,15 @@ in this file.
   documents and `SubproblemError` instances, unwrapping
   the latter and deep-copying the array so post-throw
   mutation cannot leak into the wire form.
+- **schema**: `ACMESignAlgorithmSchema` (picklist over
+  `acmeSignAlgorithms`) and the matching
+  `validateACMESignAlgorithm` validator. Lets callers
+  validate `alg` independently of the full header
+  schema so an unsupported algorithm surfaces as
+  `badSignatureAlgorithm` (RFC 8555 §6.7) rather than
+  the catch-all `malformed`. The two ACME header bases
+  now compose the named schema internally; behaviour
+  unchanged.
 - **types**: `errorStatus` URN → HTTP-status table
   (`Readonly<Record<ErrorType, number>>`) following
   Boulder defaults, with RFC 9773 §7.4 locking

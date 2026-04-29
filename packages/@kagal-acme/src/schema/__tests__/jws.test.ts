@@ -2,9 +2,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { acmeSignAlgorithms } from '../../types';
+
 import {
   validateACMEProtectedHeader,
   validateACMERequestHeader,
+  validateACMESignAlgorithm,
   validateFlattenedJWS,
   validateJWSProtectedHeader,
 } from '..';
@@ -449,5 +452,42 @@ describe('validateACMERequestHeader', () => {
           Record<string, unknown>).crit,
       ).toEqual(['nonce']);
     }
+  });
+});
+
+describe('validateACMESignAlgorithm', () => {
+  it('accepts every member of acmeSignAlgorithms', () => {
+    for (const alg of acmeSignAlgorithms) {
+      const result = validateACMESignAlgorithm(alg);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toBe(alg);
+      }
+    }
+  });
+
+  it('rejects HS256 (MAC, forbidden on outer JWS)', () => {
+    const result = validateACMESignAlgorithm('HS256');
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects alg: none', () => {
+    const result = validateACMESignAlgorithm('none');
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an unregistered alg', () => {
+    const result = validateACMESignAlgorithm('HS999');
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a non-string input', () => {
+    const result = validateACMESignAlgorithm(256);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects undefined', () => {
+    const result = validateACMESignAlgorithm(undefined);
+    expect(result.success).toBe(false);
   });
 });
