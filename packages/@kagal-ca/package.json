@@ -64,8 +64,8 @@
     "@kagal/acme": "workspace:^"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.13.1",
-    "@cloudflare/workers-types": "^4.20260317.1",
+    "@cloudflare/vitest-pool-workers": "^0.15.1",
+    "@cloudflare/workers-types": "^4.20260429.1",
     "@kagal/build-tsdocs": "workspace:^",
     "@kagal/cross-test": "^0.1.2",
     "@poupe/eslint-config": "~0.9.1",
@@ -80,7 +80,7 @@
     "vitest": "^4.1.4"
   },
   "peerDependencies": {
-    "@cloudflare/workers-types": "^4.20260317.1"
+    "@cloudflare/workers-types": "^4.20260429.1"
   },
   "engines": {
     "node": ">= 20.20.1",
