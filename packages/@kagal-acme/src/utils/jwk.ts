@@ -3,8 +3,7 @@
 
 import { exportJWK as joseExportJWK } from 'jose';
 
-import type { Base64url } from '../types/encoding';
-import type { JWK } from '../types/jws/jwk';
+import type { Base64url, JWK } from '../types';
 import { validateJWK } from '../schema';
 
 import { encodeBase64url } from './encoding';

@@ -1,6 +1,6 @@
 // Base64url encoding utilities
 
-import { asBase64url, type Base64url } from '../types/encoding';
+import { asBase64url, type Base64url } from '../types';
 
 /**
  * Normalise a {@link BufferSource} to a {@link Uint8Array}

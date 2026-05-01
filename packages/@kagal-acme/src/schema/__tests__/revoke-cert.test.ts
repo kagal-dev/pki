@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { validateRevokeCert } from '..';
-import { crlReasonCodes } from '../../types/requests/revoke-cert';
+import { crlReasonCodes } from '../../types';
 
 describe('validateRevokeCert', () => {
   it('accepts certificate only', () => {

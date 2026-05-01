@@ -2,10 +2,7 @@
 
 import * as v from 'valibot';
 
-import {
-  ecCurves,
-  okpCurves,
-} from '../types/jws/jwk';
+import { ecCurves, okpCurves } from '../types';
 
 import { Base64urlSchema } from './encoding';
 

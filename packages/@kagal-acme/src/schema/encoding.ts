@@ -9,7 +9,7 @@ import {
   type Base64url,
   type Base64urlAlphabet,
   type PEM,
-} from '../types/encoding';
+} from '../types';
 
 /** Base64url without padding (RFC 7515 §2). */
 const base64url = /^[A-Za-z0-9_-]+$/;

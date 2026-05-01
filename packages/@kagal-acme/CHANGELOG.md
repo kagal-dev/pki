@@ -31,6 +31,11 @@ in this file.
 
 - **deps**: `jose ^6.2.2 → ^6.2.3` (runtime dependency
   for /utils JWK support).
+- **internal**: `/schema` and `/utils` now consume
+  types via the `/types` barrel rather than reaching
+  into specific files. The internal layout of `/types`
+  is private implementation detail; no public API
+  change.
 - **package**: Removed redundant `main` / `module`
   fields (covered by the `exports` map).
 

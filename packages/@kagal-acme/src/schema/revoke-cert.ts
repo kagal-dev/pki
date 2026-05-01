@@ -2,7 +2,7 @@
 
 import * as v from 'valibot';
 
-import { crlReasonCodes } from '../types/requests/revoke-cert';
+import { crlReasonCodes } from '../types';
 
 import { Base64urlSchema } from './encoding';
 

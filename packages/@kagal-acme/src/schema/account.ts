@@ -2,9 +2,7 @@
 
 import * as v from 'valibot';
 
-import {
-  accountStatuses,
-} from '../types/constants/status';
+import { accountStatuses } from '../types';
 
 import { FlattenedJWSSchema } from './jws';
 
