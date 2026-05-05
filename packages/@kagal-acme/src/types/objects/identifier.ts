@@ -24,15 +24,18 @@ export type DNSIdentifier = {
  *
  * @remarks
  * `value` is the textual form of the address — RFC
- * 1123 §2.1 dotted-decimal for IPv4, RFC 5952 §4
- * canonical text for IPv6.
+ * 1123 §2.1 dotted-decimal for IPv4, RFC 4291 textual
+ * form for IPv6. RFC 5952 §4 canonicalisation is
+ * deferred to `/utils`; consumers canonicalise before
+ * storage or comparison (see `schema/identifier.ts`
+ * policy note).
  *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc8738}
  */
 export type IPIdentifier = {
   type: 'ip'
 
-  /** IPv4 or IPv6 textual form. */
+  /** IPv4 or IPv6 textual form (not canonicalised). */
   value: string
 };
 

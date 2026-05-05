@@ -15,8 +15,6 @@ packages for PKI (Public Key Infrastructure):
   Transparency types and schema validators (RFC 9162)
 - **`@kagal/ca`** — challenge-less, EAB-driven private
   CA engine for Cloudflare Workers
-- **`@kagal/build-tsdocs`** — TSDoc extraction hook for
-  unbuild, used across the other packages
 
 The packages follow a strict layering:
 
@@ -47,12 +45,6 @@ pki/
 │   │       ├── utils/         # Sub-path: @kagal/acme/utils
 │   │       ├── client/        # Sub-path: @kagal/acme/client
 │   │       └── server/        # Sub-path: @kagal/acme/server
-│   ├── @kagal-build-tsdocs/   # @kagal/build-tsdocs
-│   │   └── src/
-│   │       ├── index.ts       # newDocumentsHook(), VERSION
-│   │       ├── types.ts       # Manifest types, DocEntry re-export
-│   │       ├── extract.ts     # Symbol extraction logic
-│   │       └── write.ts       # JSON output and logging
 │   ├── @kagal-ca/             # @kagal/ca
 │   │   └── src/
 │   │       ├── index.ts       # Root entry (VERSION, CAEnv)
@@ -68,29 +60,15 @@ pki/
 └── package.json               # Root (private)
 ```
 
-### `@kagal/acme` Sub-path Exports
-
-| Export | Purpose | Runtime deps |
-|--------|---------|--------------|
-| `@kagal/acme/types` | Types, const tuples, ReadonlySet, `narrow()` | none |
-| `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | Base64url codec, random bytes, JWK thumbprints, JWK export / parse, `mustMembers` | WebCrypto, jose, /schema |
-| `@kagal/acme/client` | Stub — no surface yet | none |
-| `@kagal/acme/server` | Stub — no surface yet | none |
-
-Planned:
-
-| Export | Purpose | Runtime deps |
-|--------|---------|--------------|
-| `@kagal/acme/utils` | + CSR parsing, cert inspection, ARI cert ID, PEM helpers | + @peculiar/x509, pkijs |
-| `@kagal/acme/client` | + Client state machines | /schema, /utils |
-| `@kagal/acme/server` | + Server state machines | /schema, /utils |
+### `@kagal/acme`
 
 The root export (`@kagal/acme`) re-exports types +
 client + server. It does NOT re-export schema or utils.
 
-See `packages/@kagal-acme/AGENTS.md` for type-level
-patterns and conventions.
+See [`packages/@kagal-acme/README.md`](packages/@kagal-acme/README.md)
+for sub-path exports and usage, and
+[`packages/@kagal-acme/AGENTS.md`](packages/@kagal-acme/AGENTS.md)
+for type-level patterns and conventions.
 
 ### `@kagal/ca` Architecture
 
@@ -109,6 +87,8 @@ It runs as a single Durable Object per CA with SQLite
 storage.
 
 ## Reference RFCs
+
+<!-- cspell:words CFRG -->
 
 Local copies live in `docs/rfc/`:
 
@@ -173,6 +153,48 @@ Enforced by .editorconfig and @poupe/eslint-config:
 
 Prefer `new` or `make` prefix, not `create`
 (e.g. `newFoo()`, `makeFoo()`).
+
+### Handling cspell findings
+
+`pnpm lint` runs `cspell` against the tree using
+`internal/build/cspell.json`. When cspell flags a
+word, prefer fixing over whitelisting:
+
+- US spelling → British equivalent.
+- Concatenated compound → hyphenate so cspell sees
+  the dictionary parts.
+- Inconsistent identifier → harmonise to the
+  canonical form already used elsewhere in the
+  codebase.
+
+If the word is genuinely correct (RFC term, brand,
+acronym, our own type name, or real English missing
+from cspell's dictionary), whitelist it at the right
+scope:
+
+- **Single file** — `cspell:words` for *named terms*
+  you want recognised across the file, placed near
+  the section heading or docstring it applies to;
+  `cspell:disable-next-line` for *opaque literals*
+  (test-vector strings, fixture filenames) where
+  naming the substring would just be noise.
+- **Multi-file** — promote to `words` in
+  `internal/build/cspell.json`.
+- **JSON file** (no comments allowed) — extend the
+  `overrides` block in `internal/build/cspell.json`.
+
+Don't put `cspell:disable-next-line` directly above
+a TSDoc/JSDoc comment — use `cspell:words` for the
+specific term. Don't break tables or bullet lists
+with inline annotations; place directives at the
+preceding section heading.
+
+Don't add base64 fragments or random test-vector
+substrings to the dictionary. The `ignoreRegExpList`
+patterns in `internal/build/cspell.json` already
+match quoted base64 blobs (16+ chars, plus the
+`'eyJ…'` JWT prefix); extend those patterns rather
+than adding literal fragments to `words`.
 
 ## Development Practices
 
@@ -277,10 +299,11 @@ options (ESNext, bundler resolution, strict mode).
 - **unbuild** for all packages (ESM + DTS, sourcemaps)
 - `build.config.ts` defines entry points — `@kagal/acme`
   has six entries (root + five sub-paths)
-- `@kagal/build-tsdocs` provides `newDocumentsHook()` —
-  an unbuild `build:done` hook that extracts TSDoc
-  symbols and writes per-export JSON to `_docs/` at the
-  package root (not inside `dist/`, does not ship to npm)
+- `@kagal/build-tsdoc` (external dep) provides
+  `newDocumentsHook()` — an unbuild `build:done` hook
+  that extracts TSDoc symbols and writes per-export JSON
+  to `_docs/` at the package root (not inside `dist/`,
+  does not ship to npm)
 - `prepare` script: `cross-test -s dist/index.mjs ||
   unbuild --stub` (conditional stubbing)
 - `dev:prepare`: `unbuild --stub` (unconditional)
@@ -298,6 +321,7 @@ No tokens stored as secrets.
 4. `pkg-pr-new` provides preview publishes on non-tag
    pushes
 
+<!-- cspell:words npmjs -->
 ### Setup (per package on npmjs.com)
 
 Each `@kagal/*` package must be configured as a

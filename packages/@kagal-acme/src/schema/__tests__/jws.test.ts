@@ -289,6 +289,7 @@ describe('validateACMEProtectedHeader', () => {
     const result = validateACMEProtectedHeader({
       alg: 'ES256',
       kid: 'https://ca.example/acct/1',
+      // cspell:disable-next-line
       nonce: 'abc defg',
       url: 'https://ca.example/order/1',
     });
@@ -315,6 +316,7 @@ describe('validateACMEProtectedHeader', () => {
     expect(result.success).toBe(false);
   });
 
+  // cspell:words crit
   it('preserves unknown fields', () => {
     const result = validateACMEProtectedHeader({
       alg: 'ES256',
@@ -425,6 +427,7 @@ describe('validateACMERequestHeader', () => {
     const result = validateACMERequestHeader({
       alg: 'ES256',
       kid: 'https://ca.example/acct/1',
+      // cspell:disable-next-line
       nonce: 'abc defg',
       url: 'https://ca.example/order/1',
     });

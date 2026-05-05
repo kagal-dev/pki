@@ -108,10 +108,12 @@ describe('validateChallenge', () => {
   });
 
   it('accepts a 25-character alphabet-only token', () => {
-    // §8 — token is "constructed only from characters
-    // in the base64url alphabet" with ≥128 bits of
-    // entropy. 25 alphabet-only chars is conformant
-    // even though `25 % 4 === 1` would fail a base64
+    // §8 says token is "constructed only from characters
+    // in the base64url alphabet". The schema only
+    // checks alphabet + `minLength(22)` as a structural
+    // proxy — entropy is a producer concern
+    // (`getRandom`). 25 alphabet-only chars passes even
+    // though `25 % 4 === 1` would fail a base64
     // decode-framing check.
     const result = validateChallenge({
       type: 'http-01',

@@ -1,30 +1,35 @@
-// Brand + signature assertions for @kagal/acme/types
-// encoding helpers. Compile-time only — these
-// `expectTypeOf` calls produce no runtime output; the
-// file is type-checked via tsconfig.tests.json but
-// never executed by vitest (not a `*.test.ts` file).
+// ACME encoding brand type assertions (RFC 7515 §2)
+//
+// Compile-time only — these `expectTypeOf` calls
+// produce no runtime output; the file is type-checked
+// via tsconfig.tests.json but never executed by vitest
+// (not a `*.test.ts` file). All imports are
+// `import type` — every referenced symbol is used in
+// `typeof` / `ReturnType` / `Parameters` / `InferOutput`
+// positions, so `/types/__tests__` keeps zero runtime
+// edges into `/schema` and `/utils`.
 
 import type * as v from 'valibot';
 import { expectTypeOf } from 'vitest';
 
-import {
+import type {
   asBase64url,
   asPEM,
-  type Base64url,
-  type PEM,
+  Base64url,
+  PEM,
 } from '../encoding';
 
-import {
+import type {
   Base64urlOrEmptySchema,
   Base64urlSchema,
   PEMSchema,
   validateBase64url,
   validateBase64urlOrEmpty,
   validatePEM,
-  type ValidationResult,
+  ValidationResult,
 } from '../../schema';
 
-import {
+import type {
   encodeBase64url,
   getRandom,
   jwkThumbprint,

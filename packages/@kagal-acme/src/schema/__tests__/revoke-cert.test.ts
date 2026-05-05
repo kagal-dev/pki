@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { validateRevokeCert } from '..';
+import { crlReasonCodes } from '../../types/requests/revoke-cert';
 
 describe('validateRevokeCert', () => {
   it('accepts certificate only', () => {
@@ -72,7 +73,9 @@ describe('validateRevokeCert', () => {
 
   it('accepts every valid reason code', () => {
     // RFC 5280 §5.3.1 — 0..6, 8, 9, 10 (7 reserved).
-    for (const reason of [0, 1, 2, 3, 4, 5, 6, 8, 9, 10]) {
+    // Iterate the canonical tuple so future additions
+    // are automatically covered.
+    for (const reason of crlReasonCodes) {
       const result = validateRevokeCert({
         certificate: 'MIICYjCCAUoCAQAwHTEbMBkGA1UE',
         reason,

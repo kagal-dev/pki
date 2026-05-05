@@ -87,6 +87,7 @@ export function asBase64urlAlphabet(value: string): Base64urlAlphabet {
   return value as Base64urlAlphabet;
 }
 
+// cspell:words serialiser serialisers
 /**
  * PEM-encoded text with `-----BEGIN`/`-----END` armour
  * (RFC 7468). Used for keys, CSRs, certificates, and
