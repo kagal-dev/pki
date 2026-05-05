@@ -15,8 +15,6 @@ packages for PKI (Public Key Infrastructure):
   Transparency types and schema validators (RFC 9162)
 - **`@kagal/ca`** — challenge-less, EAB-driven private
   CA engine for Cloudflare Workers
-- **`@kagal/build-tsdocs`** — TSDoc extraction hook for
-  unbuild, used across the other packages
 
 The packages follow a strict layering:
 
@@ -47,12 +45,6 @@ pki/
 │   │       ├── utils/         # Sub-path: @kagal/acme/utils
 │   │       ├── client/        # Sub-path: @kagal/acme/client
 │   │       └── server/        # Sub-path: @kagal/acme/server
-│   ├── @kagal-build-tsdocs/   # @kagal/build-tsdocs
-│   │   └── src/
-│   │       ├── index.ts       # newDocumentsHook(), VERSION
-│   │       ├── types.ts       # Manifest types, DocEntry re-export
-│   │       ├── extract.ts     # Symbol extraction logic
-│   │       └── write.ts       # JSON output and logging
 │   ├── @kagal-ca/             # @kagal/ca
 │   │   └── src/
 │   │       ├── index.ts       # Root entry (VERSION, CAEnv)
@@ -307,10 +299,11 @@ options (ESNext, bundler resolution, strict mode).
 - **unbuild** for all packages (ESM + DTS, sourcemaps)
 - `build.config.ts` defines entry points — `@kagal/acme`
   has six entries (root + five sub-paths)
-- `@kagal/build-tsdocs` provides `newDocumentsHook()` —
-  an unbuild `build:done` hook that extracts TSDoc
-  symbols and writes per-export JSON to `_docs/` at the
-  package root (not inside `dist/`, does not ship to npm)
+- `@kagal/build-tsdoc` (external dep) provides
+  `newDocumentsHook()` — an unbuild `build:done` hook
+  that extracts TSDoc symbols and writes per-export JSON
+  to `_docs/` at the package root (not inside `dist/`,
+  does not ship to npm)
 - `prepare` script: `cross-test -s dist/index.mjs ||
   unbuild --stub` (conditional stubbing)
 - `dev:prepare`: `unbuild --stub` (unconditional)
