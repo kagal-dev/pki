@@ -5,6 +5,21 @@ export { VERSION } from '..';
 export { mustMembers } from './object';
 
 export {
+  extractAuthorityInfoAccess,
+  extractBasicConstraints,
+  extractCertificatePolicies,
+  extractCRLDistributionPoints,
+  extractExtendedKeyUsage,
+  extractKeyUsage,
+  extractRemainingExtensions,
+  extractSANIdentifiers,
+  findExtension,
+  findExtensionByType,
+  findSANExtension,
+  parseCSR,
+} from './csr';
+
+export {
   decodeBase64url,
   encodeBase64url,
   getRandom,
@@ -17,3 +32,5 @@ export {
   parseJWS,
   type ResolveKey,
 } from './jws';
+
+export { decodePEM, encodePEM } from './pem';

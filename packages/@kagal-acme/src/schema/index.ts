@@ -9,20 +9,26 @@ import type {
   ACMEProtectedHeader,
   ACMERequestHeader,
   ACMESignAlgorithm,
+  AuthorityInfoAccess,
   Authorization,
   Base64url,
+  BasicConstraints,
   CertID,
   Challenge,
+  CSR,
   DeactivateAccount,
   DeactivateAuthorization,
   Directory,
   DirectoryMeta,
+  DistinguishedName,
+  Extension,
   Finalize,
   FlattenedJWS,
   Identifier,
   JWK,
   JWSProtectedHeader,
   KeyChange,
+  KeyUsage,
   NewAccount,
   NewAuthz,
   NewOrder,
@@ -37,6 +43,14 @@ import type {
 import { AccountSchema } from './account';
 import { AuthorizationSchema } from './authorization';
 import { ChallengeSchema } from './challenge';
+import {
+  AuthorityInfoAccessSchema,
+  BasicConstraintsSchema,
+  CSRSchema,
+  DistinguishedNameSchema,
+  ExtensionSchema,
+  KeyUsageSchema,
+} from './csr';
 import {
   DirectoryMetaSchema,
   DirectorySchema,
@@ -80,6 +94,14 @@ import { RevokeCertSchema } from './revoke-cert';
 export { AccountSchema } from './account';
 export { AuthorizationSchema } from './authorization';
 export { ChallengeSchema } from './challenge';
+export {
+  AuthorityInfoAccessSchema,
+  BasicConstraintsSchema,
+  CSRSchema,
+  DistinguishedNameSchema,
+  ExtensionSchema,
+  KeyUsageSchema,
+} from './csr';
 export {
   DirectoryMetaSchema,
   DirectorySchema,
@@ -239,6 +261,26 @@ export function validateAccount(
 }
 
 /**
+ * Validate an {@link AuthorityInfoAccess} shape.
+ *
+ * @remarks
+ * Structural check only — verifies the optional
+ * `ocsp` / `caIssuers` URL arrays. URL syntax is not
+ * validated; the orchestrator owns policy on which
+ * URL forms it will emit (RFC 5280 §4.2.2.1 admits
+ * arbitrary URI forms).
+ *
+ * @param input - plain object
+ * @returns {@link ValidationResult} with
+ *   {@link AuthorityInfoAccess} on success
+ */
+export function validateAuthorityInfoAccess(
+  input: unknown,
+): ValidationResult<AuthorityInfoAccess> {
+  return safeValidate(AuthorityInfoAccessSchema, input);
+}
+
+/**
  * Validate an {@link Authorization} payload.
  *
  * @param input - parsed JSON
@@ -249,6 +291,26 @@ export function validateAuthorization(
   input: unknown,
 ): ValidationResult<Authorization> {
   return safeValidate(AuthorizationSchema, input);
+}
+
+/**
+ * Validate a {@link BasicConstraints} shape.
+ *
+ * @remarks
+ * Structural check only — verifies the `ca` boolean
+ * and the optional non-negative integer `pathLength`.
+ * The signer enforces the RFC 5280 §4.2.1.9
+ * "pathLength meaningful only when ca is true"
+ * coupling at TBS encode time.
+ *
+ * @param input - plain object
+ * @returns {@link ValidationResult} with
+ *   {@link BasicConstraints} on success
+ */
+export function validateBasicConstraints(
+  input: unknown,
+): ValidationResult<BasicConstraints> {
+  return safeValidate(BasicConstraintsSchema, input);
 }
 
 /**
@@ -278,6 +340,26 @@ export function validateCertID(
 }
 
 /**
+ * Validate a decoded {@link CSR} shape.
+ *
+ * @remarks
+ * Structural check only — verifies the plain-object
+ * form (subject, subjectPublicKey, sans, der).
+ * Proof-of-possession is a crypto concern handled by
+ * `parseCSR` in `@kagal/acme/utils`, not by this
+ * validator.
+ *
+ * @param input - plain object
+ * @returns {@link ValidationResult} with {@link CSR} on
+ *   success
+ */
+export function validateCSR(
+  input: unknown,
+): ValidationResult<CSR> {
+  return safeValidate(CSRSchema, input);
+}
+
+/**
  * Validate a {@link Directory} payload.
  *
  * @param input - parsed JSON
@@ -301,6 +383,46 @@ export function validateDirectoryMeta(
   input: unknown,
 ): ValidationResult<DirectoryMeta> {
   return safeValidate(DirectoryMetaSchema, input);
+}
+
+/**
+ * Validate a {@link DistinguishedName} shape.
+ *
+ * @remarks
+ * Structural check only — verifies the outer
+ * `Array<Record<string, string[]>>` form. Attribute
+ * short-names (`CN`, `O`, `OU`, `C`, …) and their
+ * value strings are not validated; that is the x509
+ * encoder's concern.
+ *
+ * @param input - plain value
+ * @returns {@link ValidationResult} with
+ *   {@link DistinguishedName} on success
+ */
+export function validateDistinguishedName(
+  input: unknown,
+): ValidationResult<DistinguishedName> {
+  return safeValidate(DistinguishedNameSchema, input);
+}
+
+/**
+ * Validate a generic {@link Extension} envelope.
+ *
+ * @remarks
+ * Structural check only — verifies the OID `id`,
+ * optional `critical` boolean, and `value`
+ * `Uint8Array`. The DER `value` is opaque to this
+ * schema; downstream consumers (the signer's TBS
+ * encoder, custom extension parsers) interpret it.
+ *
+ * @param input - plain object
+ * @returns {@link ValidationResult} with
+ *   {@link Extension} on success
+ */
+export function validateExtension(
+  input: unknown,
+): ValidationResult<Extension> {
+  return safeValidate(ExtensionSchema, input);
 }
 
 /**
@@ -410,6 +532,27 @@ export function validateIdentifier(
   input: unknown,
 ): ValidationResult<Identifier> {
   return safeValidate(IdentifierSchema, input);
+}
+
+/**
+ * Validate a {@link KeyUsage} bit name.
+ *
+ * @remarks
+ * Single-name picklist check — rejects strings
+ * outside the nine RFC 5280 §4.2.1.3 names. To
+ * validate a full key-usage list, run the validator
+ * over each entry; the schema layer keeps the
+ * single-name check minimal so consumers can pick
+ * their own collection shape.
+ *
+ * @param input - raw string
+ * @returns {@link ValidationResult} with
+ *   {@link KeyUsage} on success
+ */
+export function validateKeyUsage(
+  input: unknown,
+): ValidationResult<KeyUsage> {
+  return safeValidate(KeyUsageSchema, input);
 }
 
 /**

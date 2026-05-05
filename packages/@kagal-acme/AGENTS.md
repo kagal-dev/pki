@@ -13,14 +13,17 @@ The `/schema` sub-path depends only on Valibot.
 The `/utils` sub-path uses WebCrypto and
 `btoa`/`atob` for base64url codec, random bytes,
 and RFC 7638 JWK thumbprint; `jose` for WebCrypto
-JWK export and ACME JWS verification;
+JWK export and ACME JWS verification; `@peculiar/x509`
+(with `reflect-metadata` polyfill) for PKCS#10 CSR
+parse + verify and PEM encode / decode;
 `/schema` for structural validation in `parseJWK`,
 `exportJWK`, and `parseJWS`; and `/error` so
-`parseJWS` can throw `ProblemError` with the RFC
-8555 §6.7 URN already resolved (`malformed`,
-`badSignatureAlgorithm`, `unauthorized`). It will
-extend with `@peculiar/x509` + `pkijs` for CSR,
-cert, and ARI helpers.
+`parseJWS` and `parseCSR` can throw `ProblemError`
+with the RFC 8555 §6.7 URN already resolved
+(`malformed`, `badSignatureAlgorithm`, `unauthorized`,
+`badCSR`, `badPublicKey`, `compound`). It will
+extend with `pkijs` for cert inspection and ARI
+helpers.
 The `/types` sub-path also exposes pure data factories
 (`newProblem`, `newSubproblem`) for building RFC 7807
 documents with the URN→status table applied — used by
@@ -45,7 +48,7 @@ The `/client` and `/server` sub-paths compose
 |--------|---------|
 | `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories |
 | `@kagal/acme/schema` | Valibot validators conforming to `/types` |
-| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse, ACME JWS parse + verify, `mustMembers` |
+| `@kagal/acme/utils` | base64url codec, random bytes, RFC 7638 JWK thumbprint, JWK export / parse, ACME JWS parse + verify, PKCS#10 CSR parse + verify, PEM encode / decode, `mustMembers` |
 | `@kagal/acme/error` | `ProblemError` / `SubproblemError` throwable Error wrappers around `/types`'s `newProblem` / `newSubproblem`, with URN-aware shortcuts (`malformed` / `unauthorized` / `serverInternal` / `compound`; `rejectedIdentifier` / `caa`) |
 | `@kagal/acme/client` | Stub — no surface yet |
 | `@kagal/acme/server` | Stub — no surface yet |
@@ -54,7 +57,7 @@ The `/client` and `/server` sub-paths compose
 
 | Export | Purpose |
 |--------|---------|
-| `@kagal/acme/utils` | + CSR, cert, ARI, PEM utilities |
+| `@kagal/acme/utils` | + cert, ARI utilities |
 | `@kagal/acme/client` | + Client state machines |
 | `@kagal/acme/server` | + Server state machines |
 
@@ -127,6 +130,11 @@ export const orderStatuses = [...] as const;
 export type OrderStatus = (typeof orderStatuses)[number];
 export const OrderStatuses: ReadonlySet<OrderStatus> = new Set(orderStatuses);
 ```
+
+The type stays a string-literal union: comparisons,
+`switch` exhaustiveness, and `Set.has()` runtime checks
+work directly on the wire string. No object enums, no
+`typeof X.Member` indirection.
 
 All constant files live in [`types/constants/`][constants].
 Utility functions (e.g. `narrow()`) live in
@@ -225,6 +233,10 @@ JWSProtectedHeader          — RFC 7515: alg, jwk?, kid?
 - No circular imports within `types/`.
 
 ## Schema Sub-path Patterns
+
+Hand-written interfaces in `/types` are canonical;
+Valibot schemas in `/schema` conform to them, enforced
+by bidirectional `expectTypeOf` checks.
 
 ### File structure
 
@@ -343,7 +355,10 @@ if (result.success) {
 ```
 
 The `data` field returns the hand-written type from
-`/types`, not Valibot's `InferOutput`.
+`/types`, not Valibot's `InferOutput`. This hides
+`looseObject`'s `[key: string]: unknown` index signature
+and keeps Valibot's API surface out of consumer code
+paths that don't otherwise touch Valibot.
 
 ### Conformance tests
 
@@ -432,6 +447,78 @@ re-padding. The HTML spec's forgiving-base64
 decoder accepts missing `=` padding, and every
 browser / worker runtime conforms. Don't add a
 re-pad step — it would be dead code.
+
+### `utils/x509.ts` re-export centraliser
+
+[`utils/x509.ts`][u-x509] is the single import
+surface for `@peculiar/x509` symbols used elsewhere
+in `/utils` and tests. Two reasons it exists as its
+own module:
+
+- **Polyfill bootstrap.** `@peculiar/x509`'s
+  tsyringe DI needs `Reflect.metadata` defined
+  before any of its classes evaluate. The
+  `reflect-metadata` import sits at the top of
+  `utils/x509.ts` so a single load of the module
+  polyfills the runtime once; downstream callers
+  ([`utils/csr.ts`][u-csr], [`utils/pem.ts`][u-pem],
+  test files) reach `@peculiar/x509` through this
+  module instead of importing it directly.
+- **Test-only `Pkcs10CertificateRequestGenerator`.**
+  The CSR generator constructs CSRs from raw key
+  material for fixtures; it is re-exported from
+  [`utils/x509.ts`][u-x509] so tests use the same
+  polyfill-bootstrapped barrel as production code,
+  but it is not re-exported from
+  [`utils/index.ts`][u-index] so it does not leak
+  to package consumers.
+
+### `decodePEM` single-block policy
+
+[`decodePEM`][u-pem] rejects any input that doesn't
+decode to exactly one PEM block. Zero blocks,
+multiple blocks, and label mismatches all raise
+`ProblemError.malformed`. Concatenated chains
+(e.g. cert + intermediates) must go through a
+chain-aware helper instead — single-block
+enforcement catches the "passed a chain where a
+leaf cert was expected" mistake at the trust
+boundary rather than silently picking the first
+block.
+
+### `parseCSR` fail-closed contract
+
+[`parseCSR`][u-csr] is PoP-verified by
+construction: a returned [`CSR`][csr] carries no
+tagged status — every step (PEM decode, DER parse,
+self-signature verify, JWK export, SAN extraction)
+either succeeds or throws `ProblemError`.
+Consumers (ACME finalize, CA issuance) need not
+re-verify the self-signature. Failure paths map to
+RFC 8555 §6.7 URNs:
+
+- `malformed` — PEM armour or DER parse failure.
+- `badCSR` — proof-of-possession signature failed
+  verification.
+- `badPublicKey` — subject key cannot be exported
+  as a JWK.
+- `compound` carrying `unsupportedIdentifier`
+  Subproblems — every non-`dns` / non-`ip` SAN
+  entry is collected, not just the first.
+
+### `extractSANIdentifiers` no-deduplication
+
+[`extractSANIdentifiers`][u-csr] preserves SAN
+multiplicity exactly as it appears in the CSR —
+duplicate SANs come back duplicated, original order
+is kept. Deduplication, IPv6 canonicalisation
+(RFC 5952), and DNS case folding are deliberately
+not the extractor's concern; consumers (ACME order
+matching, storage keys, comparison paths) decide
+their own normalisation policy. Unsupported SAN
+types (`email`, `URI`, `otherName`, …) are
+aggregated into a single `compound` Problem with
+one Subproblem per offending entry.
 
 ## Errors Sub-path Patterns
 
@@ -551,6 +638,7 @@ hermeticity of the document they pass.
 [constants]: src/types/constants/
 [error-type]: src/types/constants/error-type.ts
 [utils]: src/types/utils.ts
+[csr]: src/types/csr.ts
 [encoding]: src/types/encoding.ts
 [challenge]: src/types/objects/challenge.ts
 [authorization]: src/types/objects/authorization.ts
@@ -577,5 +665,9 @@ hermeticity of the document they pass.
 [s-new-authz]: src/schema/new-authz.ts
 [s-key-change]: src/schema/key-change.ts
 [s-conformance]: src/schema/__tests__/conformance.types.ts
+[u-csr]: src/utils/csr.ts
 [u-encoding]: src/utils/encoding.ts
+[u-index]: src/utils/index.ts
 [u-jwk]: src/utils/jwk.ts
+[u-pem]: src/utils/pem.ts
+[u-x509]: src/utils/x509.ts

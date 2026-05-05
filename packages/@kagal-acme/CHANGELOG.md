@@ -32,6 +32,13 @@ in this file.
   the catch-all `malformed`. The two ACME header bases
   now compose the named schema internally; behaviour
   unchanged.
+- **schema**: CSR schemas — `CSRSchema`,
+  `DistinguishedNameSchema`, `KeyUsageSchema`,
+  `BasicConstraintsSchema`,
+  `AuthorityInfoAccessSchema`, `ExtensionSchema`, plus
+  matching `validateXxx` wrappers. Conform to the
+  hand-written types via bidirectional `expectTypeOf`
+  checks.
 - **types**: `errorStatus` URN → HTTP-status table
   (`Readonly<Record<ErrorType, number>>`) following
   Boulder defaults, with RFC 9773 §7.4 locking
@@ -42,6 +49,13 @@ in this file.
   RFC 8555 §6.7.1). `status` is always emitted,
   derived from `errorStatus[urn]` unless overridden
   via `options.status`.
+- **types**: `CSR` (decoded PKCS#10 + RFC 5280 TBS
+  slots the orchestrator amends before the signer
+  assembles the certificate), `DistinguishedName`
+  (`Array<Record<string, string[]>>`, structurally
+  compatible with `@peculiar/x509`'s `JsonName`),
+  `KeyUsage`, `ExtendedKeyUsage`, `BasicConstraints`,
+  `AuthorityInfoAccess`, `Extension`.
 - **utils**: `parseJWS` — canonical decode +
   structural-validate + crypto-verify entry point for
   ACME outer-JWS requests (RFC 7515 §7.2.2 + RFC 8555
@@ -55,6 +69,39 @@ in this file.
   `unauthorized`); errors thrown by the resolver pass
   through unchanged so callers keep control of their
   own URNs.
+- **utils**: `parseCSR(pem)` decodes a PKCS#10 CSR
+  (RFC 2986, RFC 8555 §7.4), verifies the
+  proof-of-possession self-signature, and returns a
+  fail-closed `CSR` tree. Throws `ProblemError` with
+  the §6.7 URN already mapped: `malformed` (PEM
+  armour broken, wrong label, undecodable DER),
+  `badCSR` (PoP verification failure), `badPublicKey`
+  (subject public key cannot be exported as a JWK),
+  or a `compound` Problem aggregating one
+  `unsupportedIdentifier` Subproblem per non-`dns`
+  / non-`ip` SAN entry. Companion `decodePEM` (single-
+  block RFC 7468 decoder, rejects multi-block input
+  and label mismatches), `encodePEM` (branded PEM
+  encoder), and extension extractors
+  (`findExtension`, `findExtensionByType`,
+  `findSANExtension`, `extractSANIdentifiers`,
+  `extractBasicConstraints`, `extractKeyUsage`,
+  `extractExtendedKeyUsage`,
+  `extractCertificatePolicies`,
+  `extractAuthorityInfoAccess`,
+  `extractCRLDistributionPoints`,
+  `extractRemainingExtensions`) exposed for reuse in
+  the future `@kagal/ca` cert-parsing path.
+  `extractSANIdentifiers` preserves SAN multiplicity
+  exactly as it appears in the CSR — deduplication,
+  IPv6 canonicalisation, and DNS case folding are
+  consumer concerns.
+
+### Changed
+
+- **deps**: `@peculiar/x509` ^2.0.0 and
+  `reflect-metadata` ^0.2.2 added as runtime
+  dependencies for CSR / PEM / x509 reflection.
 
 ## [0.1.1] - 2026-05-07
 

@@ -10,19 +10,25 @@ import type {
   ACMEProtectedHeader,
   ACMERequestHeader,
   ACMESignAlgorithm,
+  AuthorityInfoAccess,
   Authorization,
+  BasicConstraints,
   CertID,
   Challenge,
+  CSR,
   DeactivateAccount,
   DeactivateAuthorization,
   Directory,
   DirectoryMeta,
+  DistinguishedName,
+  Extension,
   Finalize,
   FlattenedJWS,
   Identifier,
   JWK,
   JWSProtectedHeader,
   KeyChange,
+  KeyUsage,
   NewAccount,
   NewAuthz,
   NewOrder,
@@ -38,19 +44,25 @@ import type {
   ACMEProtectedHeaderSchema,
   ACMERequestHeaderSchema,
   ACMESignAlgorithmSchema,
+  AuthorityInfoAccessSchema,
   AuthorizationSchema,
+  BasicConstraintsSchema,
   CertIDSchema,
   ChallengeSchema,
+  CSRSchema,
   DeactivateAccountSchema,
   DeactivateAuthorizationSchema,
   DirectoryMetaSchema,
   DirectorySchema,
+  DistinguishedNameSchema,
+  ExtensionSchema,
   FinalizeSchema,
   FlattenedJWSSchema,
   IdentifierSchema,
   JWKSchema,
   JWSProtectedHeaderSchema,
   KeyChangeSchema,
+  KeyUsageSchema,
   NewAccountSchema,
   NewAuthzSchema,
   NewOrderSchema,
@@ -110,6 +122,54 @@ expectTypeOf<
 >().toExtend<CertID>();
 expectTypeOf<CertID>().toExtend<
   SchemaOutput<typeof CertIDSchema>
+>();
+
+// AuthorityInfoAccess
+expectTypeOf<
+  SchemaOutput<typeof AuthorityInfoAccessSchema>
+>().toExtend<AuthorityInfoAccess>();
+expectTypeOf<AuthorityInfoAccess>().toExtend<
+  SchemaOutput<typeof AuthorityInfoAccessSchema>
+>();
+
+// BasicConstraints
+expectTypeOf<
+  SchemaOutput<typeof BasicConstraintsSchema>
+>().toExtend<BasicConstraints>();
+expectTypeOf<BasicConstraints>().toExtend<
+  SchemaOutput<typeof BasicConstraintsSchema>
+>();
+
+// CSR
+expectTypeOf<
+  SchemaOutput<typeof CSRSchema>
+>().toExtend<CSR>();
+expectTypeOf<CSR>().toExtend<
+  SchemaOutput<typeof CSRSchema>
+>();
+
+// DistinguishedName
+expectTypeOf<
+  SchemaOutput<typeof DistinguishedNameSchema>
+>().toExtend<DistinguishedName>();
+expectTypeOf<DistinguishedName>().toExtend<
+  SchemaOutput<typeof DistinguishedNameSchema>
+>();
+
+// Extension
+expectTypeOf<
+  SchemaOutput<typeof ExtensionSchema>
+>().toExtend<Extension>();
+expectTypeOf<Extension>().toExtend<
+  SchemaOutput<typeof ExtensionSchema>
+>();
+
+// KeyUsage
+expectTypeOf<
+  SchemaOutput<typeof KeyUsageSchema>
+>().toExtend<KeyUsage>();
+expectTypeOf<KeyUsage>().toExtend<
+  SchemaOutput<typeof KeyUsageSchema>
 >();
 
 // Finalize

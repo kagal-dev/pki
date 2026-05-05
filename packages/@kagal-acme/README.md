@@ -12,14 +12,14 @@ utilities.
 |--------|-------------|--------------|
 | `@kagal/acme/types` | Type definitions, runtime constants, branded strings, RFC 7807 data factories — see [`/types` exports][types-exports] | none |
 | `@kagal/acme/schema` | Valibot validators | valibot |
-| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse, ACME JWS parse + verify, `mustMembers` | WebCrypto, jose, /schema, /error |
+| `@kagal/acme/utils` | base64url codec, random bytes, JWK thumbprint, JWK export / parse, ACME JWS parse + verify, PKCS#10 CSR parse + verify, PEM encode / decode, `mustMembers` | WebCrypto, jose, @peculiar/x509, /schema, /error |
 | `@kagal/acme/error` | `ProblemError` / `SubproblemError` throwable Error wrappers around `/types`'s `newProblem` / `newSubproblem`, with URN-aware shortcuts (`malformed` / `unauthorized` / `serverInternal` / `compound`; `rejectedIdentifier` / `caa`) | /types |
 | `@kagal/acme/client` | Stub — no surface yet | none |
 | `@kagal/acme/server` | Stub — no surface yet | none |
 
 #### `/types` exports
 
-- Interfaces and const tuples (e.g. `Account`, `Order`, `Identifier`)
+- Interfaces and const tuples (e.g. `Account`, `Order`, `Identifier`, `CSR`, `DistinguishedName`)
 - `ReadonlySet` constants for runtime narrowing (e.g. `AccountStatuses`, `OrderStatuses`)
 - Branded `Base64url` / `Base64urlAlphabet` / `PEM`
 - `errorStatus` — URN→HTTP-status table
@@ -30,7 +30,7 @@ utilities.
 
 | Export | Description | Dependencies |
 |--------|-------------|--------------|
-| `@kagal/acme/utils` | + CSR parsing, cert inspection, ARI cert ID, PEM helpers | + @peculiar/x509, pkijs |
+| `@kagal/acme/utils` | + cert inspection, ARI cert ID | + pkijs |
 | `@kagal/acme/client` | + Client state machines | /schema, /utils |
 | `@kagal/acme/server` | + Server state machines | /schema, /utils |
 
@@ -203,6 +203,47 @@ that fails verification). Errors thrown from
 keeps control of `accountDoesNotExist` /
 `unauthorized` mapping. See [Errors](#errors) for the
 catch-and-serialise pattern.
+
+### CSR parse and verify
+
+```typescript
+import { parseCSR } from '@kagal/acme/utils';
+import { asPEM, type CSR } from '@kagal/acme/types';
+
+const pem = asPEM(rawArmouredText);
+const csr: CSR = await parseCSR(pem);
+
+csr.subject;          // DistinguishedName
+csr.subjectPublicKey; // branded JWK
+csr.sans;             // Identifier[] — dns + ip only
+csr.der;              // Uint8Array — original wire bytes
+```
+
+`parseCSR` is fail-closed: a returned `CSR` is
+PoP-verified by construction. Failures throw
+`ProblemError` mapped to the RFC 8555 §6.7 URN that
+fits — `malformed` for PEM / DER parse errors,
+`badCSR` for a self-signature that fails verification,
+`badPublicKey` for a subject key that cannot be
+exported as a JWK, and `compound` carrying
+`unsupportedIdentifier` subproblems for non-`dns` /
+non-`ip` SAN entries.
+
+### PEM encode and decode
+
+```typescript
+import { decodePEM, encodePEM } from '@kagal/acme/utils';
+
+const pem = encodePEM(derBytes, 'CERTIFICATE');  // branded PEM
+const der = decodePEM(pem, 'CERTIFICATE');       // Uint8Array
+```
+
+`decodePEM` rejects multi-block input and label
+mismatches with `ProblemError.malformed` —
+single-block enforcement catches "passed a chain
+where a leaf was expected" mistakes at the trust
+boundary. Use a chain-aware helper for concatenated
+chains.
 
 ### Errors
 

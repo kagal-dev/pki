@@ -26,6 +26,16 @@ export {
   OrderStatuses,
 } from './constants';
 
+export type {
+  AuthorityInfoAccess,
+  BasicConstraints,
+  CSR,
+  DistinguishedName,
+  ExtendedKeyUsage,
+  Extension,
+  KeyUsage,
+} from './csr';
+
 export {
   asBase64url,
   asBase64urlAlphabet,
