@@ -5,6 +5,35 @@ in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **utils**: New `/utils` sub-path with base64url codec
+  (`encodeBase64url`, `decodeBase64url`,
+  `decodeBase64urlOrEmpty`), `getRandom` for
+  cryptographically random base64url tokens,
+  `jwkThumbprint` (RFC 7638 SHA-256), `exportJWK`, and
+  `parseJWK`.
+- **types**: Branded primitives `Base64url`,
+  `Base64urlAlphabet`, and `PEM` with unvalidated
+  `asBase64url` / `asBase64urlAlphabet` / `asPEM`
+  accessors at trust boundaries.
+- **schema**: Brand-returning encoding validators
+  (`validateBase64url`, `validateBase64urlOrEmpty`,
+  `validatePEM`, `Base64urlSchema`,
+  `Base64urlOrEmptySchema`, `PEMSchema`).
+- **schema**: Tightened structural validation —
+  `StrictIdentifierSchema` for client request payloads,
+  URL validation across directory / order endpoints,
+  RFC 3339 timestamp validation, picklist enforcement
+  for status / type enums.
+
+### Changed
+
+- **deps**: `jose ^6.2.2 → ^6.2.3` (runtime dependency
+  for /utils JWK support).
+- **package**: Removed redundant `main` / `module`
+  fields (covered by the `exports` map).
+
 ## [0.1.0] - 2026-04-13
 
 Initial release.
