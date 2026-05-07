@@ -5,6 +5,10 @@ in this file.
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-05-07
+
+Initial release.
+
 ### Added
 
 - **types**: RFC 9162 Certificate Transparency types —
