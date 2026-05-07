@@ -5,6 +5,8 @@ in this file.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-07
+
 ### Added
 
 - **utils**: New `/utils` sub-path with base64url codec
