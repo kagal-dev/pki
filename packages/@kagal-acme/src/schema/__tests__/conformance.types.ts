@@ -5,54 +5,32 @@ import { expectTypeOf } from 'vitest';
 
 import type { SchemaOutput } from './test-utils';
 
-import type { JWK } from '../../types/jws/jwk';
 import type {
+  Account,
   ACMEProtectedHeader,
   ACMERequestHeader,
-  FlattenedJWS,
-  JWSProtectedHeader,
-} from '../../types/jws/jws';
-import type { Account } from '../../types/objects/account';
-import type {
   Authorization,
-} from '../../types/objects/authorization';
-import type {
+  CertID,
   Challenge,
-} from '../../types/objects/challenge';
-import type {
+  DeactivateAccount,
+  DeactivateAuthorization,
   Directory,
   DirectoryMeta,
-} from '../../types/objects/directory';
-import type {
+  Finalize,
+  FlattenedJWS,
   Identifier,
-} from '../../types/objects/identifier';
-import type { Order } from '../../types/objects/order';
-import type {
-  Problem,
-  Subproblem,
-} from '../../types/objects/problem';
-import type {
-  CertID,
-  RenewalInfo,
-} from '../../types/objects/renewal-info';
-import type { Finalize } from '../../types/requests/finalize';
-import type {
+  JWK,
+  JWSProtectedHeader,
   KeyChange,
-} from '../../types/requests/key-change';
-import type {
-  DeactivateAccount,
   NewAccount,
-} from '../../types/requests/new-account';
-import type {
-  DeactivateAuthorization,
   NewAuthz,
-} from '../../types/requests/new-authz';
-import type {
   NewOrder,
-} from '../../types/requests/new-order';
-import type {
+  Order,
+  Problem,
+  RenewalInfo,
   RevokeCert,
-} from '../../types/requests/revoke-cert';
+  Subproblem,
+} from '../../types';
 
 import type {
   AccountSchema,
@@ -217,6 +195,8 @@ expectTypeOf<
 expectTypeOf<Subproblem>().toExtend<
   SchemaOutput<typeof SubproblemSchema>
 >();
+// RFC 8555 §6.7.1: subproblems MAY carry `identifier`.
+expectTypeOf<Subproblem>().toHaveProperty('identifier');
 
 // Problem
 expectTypeOf<
@@ -225,6 +205,11 @@ expectTypeOf<
 expectTypeOf<Problem>().toExtend<
   SchemaOutput<typeof ProblemSchema>
 >();
+// RFC 8555 §6.7.1: identifier MUST NOT appear at top level of
+// an ACME problem document. Locked in at the type layer; the
+// schema's `looseObject` cannot enforce this at runtime
+// without breaking RFC 7807 §3.2 extension passthrough.
+expectTypeOf<Problem>().not.toHaveProperty('identifier');
 
 // RenewalInfo
 expectTypeOf<

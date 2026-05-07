@@ -1,6 +1,6 @@
 {
   "name": "@kagal/acme",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Platform-neutral ACME protocol library (RFC 8555)",
   "author": "Alejandro Mery <amery@apptly.co>",

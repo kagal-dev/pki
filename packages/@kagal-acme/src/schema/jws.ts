@@ -2,10 +2,7 @@
 
 import * as v from 'valibot';
 
-import {
-  acmeSignAlgorithms,
-  jwsAlgorithms,
-} from '../types/jws/alg';
+import { acmeSignAlgorithms, jwsAlgorithms } from '../types';
 
 import {
   Base64urlOrEmptySchema,

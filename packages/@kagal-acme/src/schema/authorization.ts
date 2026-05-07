@@ -2,10 +2,10 @@
 
 import * as v from 'valibot';
 
-import type { AuthorizationStatus } from '../types/constants/status';
 import {
+  type AuthorizationStatus,
   authorizationStatuses,
-} from '../types/constants/status';
+} from '../types';
 
 import { ChallengeSchema } from './challenge';
 import { IdentifierSchema } from './identifier';

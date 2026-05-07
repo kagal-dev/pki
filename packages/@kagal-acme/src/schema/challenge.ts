@@ -2,9 +2,7 @@
 
 import * as v from 'valibot';
 
-import {
-  challengeStatuses,
-} from '../types/constants/status';
+import { challengeStatuses } from '../types';
 
 import { Base64urlAlphabetSchema } from './encoding';
 import { ProblemSchema } from './problem';

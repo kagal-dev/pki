@@ -2,15 +2,15 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type {
-  ECJWK,
-  JWK,
-  OKPJWK,
-  RSAJWK,
-} from '../../types/jws/jwk';
 import { jwkThumbprint } from '..';
 import { validateJWK } from '../../schema';
-import { asBase64url } from '../../types/encoding';
+import {
+  asBase64url,
+  type ECJWK,
+  type JWK,
+  type OKPJWK,
+  type RSAJWK,
+} from '../../types';
 
 // -- test vectors --
 

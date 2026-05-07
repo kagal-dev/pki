@@ -14,7 +14,6 @@ export {
   ecCurves,
   type ECJWK,
   type JWK,
-  type JWKBase,
   type OKPCurve,
   OKPCurves,
   okpCurves,

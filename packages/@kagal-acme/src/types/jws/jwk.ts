@@ -50,19 +50,26 @@ export const OKPCurves: ReadonlySet<OKPCurve> =
 /**
  * Optional JWK members shared by all key types (RFC 7517 §4).
  *
+ * @remarks
+ * Array-valued members (`key_ops`, `x5c`) are typed as
+ * mutable `string[]` for interop with
+ * {@link https://github.com/panva/jose | jose}'s `JWK`
+ * (consumed by `exportJWK` in `/utils`). RFC 7517 does
+ * not mandate language-level immutability.
+ *
  * @see {@link https://datatracker.ietf.org/doc/html/rfc7517#section-4}
  */
-export type JWKBase = {
+type JWKBase = {
   /** Algorithm (§4.4). */
   'alg'?: string
   /** Key operations (§4.3). */
-  'key_ops'?: readonly string[]
+  'key_ops'?: string[]
   /** Key ID (§4.5). */
   'kid'?: string
   /** Public key use (§4.2). */
   'use'?: string
   /** X.509 certificate chain (§4.7). */
-  'x5c'?: readonly string[]
+  'x5c'?: string[]
   /** X.509 SHA-1 thumbprint (§4.8). */
   'x5t'?: string
   /** X.509 SHA-256 thumbprint (§4.9). */

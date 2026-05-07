@@ -2,7 +2,7 @@
 
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
-import type { JWK } from '../../types/jws/jwk';
+import type { JWK } from '../../types';
 import { exportJWK, parseJWK } from '..';
 import { jsonNull } from './test-utils';
 

@@ -6,11 +6,9 @@ export type {
 } from './account';
 export type {
   Authorization,
-  AuthorizationBase,
 } from './authorization';
 export type {
   Challenge,
-  ChallengeBase,
   DNSChallenge,
   HTTPChallenge,
   TLSALPNChallenge,

@@ -5,6 +5,69 @@ in this file.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-07
+
+### Added
+
+- **utils**: New `/utils` sub-path with base64url codec
+  (`encodeBase64url`, `decodeBase64url`,
+  `decodeBase64urlOrEmpty`), `getRandom` for
+  cryptographically random base64url tokens,
+  `jwkThumbprint` (RFC 7638 SHA-256), `exportJWK`, and
+  `parseJWK`.
+- **types**: Branded primitives `Base64url`,
+  `Base64urlAlphabet`, and `PEM` with unvalidated
+  `asBase64url` / `asBase64urlAlphabet` / `asPEM`
+  accessors at trust boundaries.
+- **schema**: Brand-returning encoding validators
+  (`validateBase64url`, `validateBase64urlOrEmpty`,
+  `validatePEM`, `Base64urlSchema`,
+  `Base64urlOrEmptySchema`, `PEMSchema`).
+- **schema**: Tightened structural validation —
+  `StrictIdentifierSchema` for client request payloads,
+  URL validation across directory / order endpoints,
+  RFC 3339 timestamp validation, picklist enforcement
+  for status / type enums.
+
+### Changed
+
+- **deps**: `jose ^6.2.2 → ^6.2.3` (runtime dependency
+  for /utils JWK support).
+- **internal**: `/schema` and `/utils` now consume
+  types via the `/types` barrel rather than reaching
+  into specific files. The internal layout of `/types`
+  is private implementation detail; no public API
+  change.
+- **package**: Removed redundant `main` / `module`
+  fields (covered by the `exports` map).
+- **types/schema**: `JWK.key_ops` and `JWK.x5c` typed
+  as `string[]` (was `readonly string[]`); the
+  matching `JWKSchema` members drop `v.readonly()`.
+  RFC 7517 §4.3 does not mandate language-level
+  immutability — this aligns with `jose.JWK` for
+  direct interop in `/utils`.
+
+### Removed
+
+- **types**: `AuthorizationBase`, `ChallengeBase`, and
+  `JWKBase` are no longer exported. They served only as
+  in-file union components for the concrete sibling
+  variants (`Authorization`, `HTTPChallenge` /
+  `DNSChallenge` / `TLSALPNChallenge`, `ECJWK` /
+  `OKPJWK` / `RSAJWK`); consumers always know which
+  concrete shape they hold.
+
+### Fixed
+
+- **types/schema**: `Problem` no longer extends
+  `Subproblem`, so the top-level `identifier` field
+  no longer appears on the `Problem` type per RFC 8555
+  §6.7.1 ("identifier MUST NOT be present at the top
+  level"). Both shapes share a private `ProblemBase`
+  carrying the RFC 7807 §3.1 fields. Conformance
+  type-tests lock the divergence: `Subproblem` MUST
+  have `identifier`, `Problem` MUST NOT.
+
 ## [0.1.0] - 2026-04-13
 
 Initial release.

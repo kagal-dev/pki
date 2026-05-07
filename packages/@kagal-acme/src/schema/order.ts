@@ -2,7 +2,7 @@
 
 import * as v from 'valibot';
 
-import { orderStatuses } from '../types/constants/status';
+import { orderStatuses } from '../types';
 
 import { IdentifierSchema } from './identifier';
 import { ProblemSchema } from './problem';
