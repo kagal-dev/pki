@@ -34,6 +34,9 @@ describe('validateNewOrder', () => {
       profile: 'tls-server',
     });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.profile).toBe('tls-server');
+    }
   });
 
   it('accepts with ARI replaces', () => {
