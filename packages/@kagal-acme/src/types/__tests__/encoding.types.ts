@@ -3,11 +3,12 @@
 // Compile-time only — these `expectTypeOf` calls
 // produce no runtime output; the file is type-checked
 // via tsconfig.tests.json but never executed by vitest
-// (not a `*.test.ts` file). All imports are
+// (not a `*.test.ts` file). All domain imports are
 // `import type` — every referenced symbol is used in
 // `typeof` / `ReturnType` / `Parameters` / `InferOutput`
 // positions, so `/types/__tests__` keeps zero runtime
-// edges into `/schema` and `/utils`.
+// edges into `/schema` and `/utils`. `expectTypeOf`
+// is the only value import (called at expression level).
 
 import type * as v from 'valibot';
 import { expectTypeOf } from 'vitest';
