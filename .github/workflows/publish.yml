@@ -25,7 +25,7 @@ jobs:
           # OIDC trusted publishing needs a recent npm: node 24
           # bundles one new enough, whereas node 22 ships an older
           # npm that cannot self-update to a supporting version.
-          node-version: '24'
+          node-version: '24.16.0'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Publish ${{ github.ref_name }}
